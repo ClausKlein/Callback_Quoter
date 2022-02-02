@@ -1,0 +1,10 @@
+/consumer
+/notifier
+/supplier
+.depend.*
+GNUmakefile*
+tags
+ctags
+.*.swp
+.*~
+*~
