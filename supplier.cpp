@@ -6,7 +6,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR* argv[])
 {
   Supplier supplier;
 
-  ACE_DEBUG ((LM_DEBUG, "\n\tMarket Status Supplier Daemon\n\n"));
+  // ACE_DEBUG ((LM_DEBUG, "\n\tMarket Status Supplier Daemon\n\n"));
 
   if (supplier.init (argc, argv) == -1)
     return -1;

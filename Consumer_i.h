@@ -24,7 +24,7 @@
  * This class has methods that are called by the callback quoter
  * server.
  */
-class Consumer_i : public POA_Callback_Quoter::Consumer
+class Consumer_i : public Callback_Quoter::POA::Consumer
 {
 public:
   /// Constructor.
@@ -40,18 +40,18 @@ public:
   virtual void shutdown (void);
 
   /// Set the ORB pointer.
-  void orb (CORBA::ORB_ptr o);
+  void orb (IDL::traits<CORBA::ORB>::ref_type o);
 
 private:
   /// ORB pointer.
-  CORBA::ORB_var orb_;
+  IDL::traits<CORBA::ORB>::ref_type orb_;
 
   /// If 1 denotes that the consumer is dead else alive.
   int quit_;
 
   // @@ Please rename to Notifier.
   /// Smart pointer to the Notifier object.
-  Notifier_var server_;
+  IDL::traits<Notifier>::ref_type server_;
 };
 
 #endif /* CONSUMER_I_H  */

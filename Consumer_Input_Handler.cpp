@@ -57,7 +57,7 @@ int Consumer_Input_Handler::register_consumer ()
   // Get the stockname the consumer is interested in.
   static char stockname[BUFSIZ];
 
-  ACE_DEBUG ((LM_DEBUG, "Stockname?"));
+  // ACE_DEBUG ((LM_DEBUG, "Stockname?"));
 
   ssize_t strlen = ACE_OS::read (ACE_STDIN, stockname, sizeof stockname - 1);
 
@@ -71,7 +71,7 @@ int Consumer_Input_Handler::register_consumer ()
 
   // Get the threshold value.
   char needed_stock_value[BUFSIZ];
-  ACE_DEBUG ((LM_DEBUG, "Threshold Stock value?"));
+  // ACE_DEBUG ((LM_DEBUG, "Threshold Stock value?"));
 
   strlen = ACE_OS::read (ACE_STDIN, needed_stock_value, sizeof needed_stock_value);
 
@@ -86,7 +86,7 @@ int Consumer_Input_Handler::register_consumer ()
     // Register with the server.
     this->consumer_handler_->server_->register_callback (this->consumer_handler_->stock_name_.c_str (),
                                                          this->consumer_handler_->threshold_value_,
-                                                         this->consumer_handler_->consumer_var_.in ());
+                                                         this->consumer_handler_->consumer_var_);
 
     // Note the registration.
     consumer_handler_->registered_ = 1;
@@ -94,7 +94,7 @@ int Consumer_Input_Handler::register_consumer ()
 
     // @@ Up to this point..
 
-    ACE_DEBUG ((LM_DEBUG, "registeration done!\n"));
+    // ACE_DEBUG ((LM_DEBUG, "registeration done!\n"));
   }
   catch (const CORBA::Exception& ex)
   {
@@ -112,16 +112,16 @@ int Consumer_Input_Handler::unregister_consumer ()
 
   if (consumer_handler_->registered_ == 1)
   {
-    this->consumer_handler_->server_->unregister_callback (this->consumer_handler_->consumer_var_.in ());
+    this->consumer_handler_->server_->unregister_callback (this->consumer_handler_->consumer_var_);
 
-    ACE_DEBUG ((LM_DEBUG, " Consumer Unregistered \n"));
+    // ACE_DEBUG ((LM_DEBUG, " Consumer Unregistered \n"));
     consumer_handler_->unregistered_ = 1;
     consumer_handler_->registered_ = 0;
   }
   else
-    ACE_DEBUG ((LM_DEBUG, " Invalid Operation: Consumer not Registered\n"));
+    // ACE_DEBUG ((LM_DEBUG, " Invalid Operation: Consumer not Registered\n"));
 
-  return 0;
+    return 0;
 }
 
 int Consumer_Input_Handler::quit_consumer_process ()
@@ -136,9 +136,9 @@ int Consumer_Input_Handler::quit_consumer_process ()
       // If the notifier has exited and the consumer tries to call
       // the unregister_callback method tehn an exception will be
       // raised. Hence check for this case using.
-      this->consumer_handler_->server_->unregister_callback (this->consumer_handler_->consumer_var_.in ());
+      this->consumer_handler_->server_->unregister_callback (this->consumer_handler_->consumer_var_);
 
-      ACE_DEBUG ((LM_DEBUG, " Consumer Unregistered \n"));
+      // ACE_DEBUG ((LM_DEBUG, " Consumer Unregistered \n"));
       consumer_handler_->unregistered_ = 0;
       consumer_handler_->registered_ = 0;
     }

@@ -16,7 +16,7 @@
 #include "ace/OS_NS_unistd.h"
 #include "ace/Reactor.h"
 #include "ace/Read_Buffer.h"
-#include "tao/debug.h"
+// XXX #include "tao/debug.h"
 
 // Constructor.
 
@@ -39,7 +39,7 @@ Supplier::~Supplier (void)
   // Close the stream.
   ACE_OS::fclose (f_ptr_);
 
-  ACE_DEBUG ((LM_DEBUG, "Market Status Supplier daemon exiting!\n"));
+  // ACE_DEBUG ((LM_DEBUG, "Market Status Supplier daemon exiting!\n"));
 }
 
 // Reads the Server factory IOR from a file.
@@ -157,7 +157,7 @@ int Supplier::run (void)
 
   long timer_id = 0;
 
-  ACE_DEBUG ((LM_DEBUG, "Market Status Supplier Daemon is running...\n"));
+  // ACE_DEBUG ((LM_DEBUG, "Market Status Supplier Daemon is running...\n"));
 
   // This sets the period for the stock-feed.
   ACE_Time_Value period (period_value_);
@@ -177,7 +177,7 @@ int Supplier::via_naming_service (void)
   try
   {
     // Initialization of the naming service.
-    if (naming_services_client_.init (orb_.in ()) != 0)
+    if (naming_services_client_.init (orb_) != 0)
       ACE_ERROR_RETURN ((LM_ERROR,
                          " (%P|%t) Unable to initialize "
                          "the TAO_Naming_Client.\n"),
@@ -186,11 +186,11 @@ int Supplier::via_naming_service (void)
     notifier_ref_name.length (1);
     notifier_ref_name[0].id = CORBA::string_dup ("Notifier");
 
-    CORBA::Object_var notifier_obj = this->naming_services_client_->resolve (notifier_ref_name);
+    IDL::traits<CORBA::Object>::ref_type notifier_obj = this->naming_services_client_->resolve (notifier_ref_name);
 
     // The CORBA::Object_var object is downcast to Notifier_var
     // using the <_narrow> method.
-    this->notifier_ = Notifier::_narrow (notifier_obj.in ());
+    this->notifier_ = Notifier::_narrow (notifier_obj);
   }
   catch (const CORBA::SystemException& sysex)
   {
@@ -230,13 +230,13 @@ int Supplier::init (int argc, ACE_TCHAR** argv)
 
     if (this->ior_ == 0)
       ACE_ERROR_RETURN ((LM_ERROR, "%s: no ior specified\n", this->argv_[0]), -1);
-    CORBA::Object_var notifier_object = this->orb_->string_to_object (this->ior_);
+    IDL::traits<CORBA::Object>::ref_type notifier_object = this->orb_->string_to_object (this->ior_);
 
-    if (CORBA::is_nil (notifier_object.in ()))
+    if (CORBA::is_nil (notifier_object))
       ACE_ERROR_RETURN ((LM_ERROR, "invalid ior <%s>\n", this->ior_), -1);
     // The downcasting from CORBA::Object_var to Notifier_var is
     // done using the <_narrow> method.
-    this->notifier_ = Notifier::_narrow (notifier_object.in ());
+    this->notifier_ = Notifier::_narrow (notifier_object);
   }
   catch (const CORBA::SystemException& sysex)
   {
@@ -263,7 +263,7 @@ int Supplier::read_file (ACE_TCHAR* filename)
 {
   f_ptr_ = ACE_OS::fopen (filename, "r");
 
-  ACE_DEBUG ((LM_DEBUG, "filename = %s\n", filename));
+  // ACE_DEBUG ((LM_DEBUG, "filename = %s\n", filename));
 
   // the stock values are to be read from a file.
   if (f_ptr_ == 0)

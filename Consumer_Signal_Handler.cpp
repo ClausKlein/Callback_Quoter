@@ -22,7 +22,7 @@ Consumer_Signal_Handler::~Consumer_Signal_Handler (void)
 // Method to handle the ^C signal.
 int Consumer_Signal_Handler::handle_signal (int /* signum */, siginfo_t*, ucontext_t*)
 {
-  ACE_DEBUG ((LM_DEBUG, " Exiting on receiving ^C\n"));
+  // ACE_DEBUG ((LM_DEBUG, " Exiting on receiving ^C\n"));
 
   quit_on_signal ();
 
@@ -47,8 +47,8 @@ int Consumer_Signal_Handler::quit_on_signal (void)
   {
     if (consumer_handler_->unregistered_ != 1 && consumer_handler_->registered_ == 1)
     {
-      this->consumer_handler_->server_->unregister_callback (this->consumer_handler_->consumer_var_.in ());
-      ACE_DEBUG ((LM_DEBUG, "Consumer Unregistered\n"));
+      this->consumer_handler_->server_->unregister_callback (this->consumer_handler_->consumer_var_);
+      // ACE_DEBUG ((LM_DEBUG, "Consumer Unregistered\n"));
     }
     this->consumer_handler_->consumer_servant_->shutdown ();
   }

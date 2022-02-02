@@ -22,8 +22,8 @@
 #  pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include "orbsvcs/CosNamingC.h"
-#include "orbsvcs/Naming/Naming_Client.h"
+#include "orbsvcs/orbsvcs/Naming/Naming_Client.h"
+#include "orbsvcs/orbsvcs/naming_server/CosNamingC.h"
 
 #include "Consumer_Input_Handler.h"
 #include "Consumer_Signal_Handler.h"
@@ -62,13 +62,13 @@ public:
   int threshold_value_;
 
   /// Server object ptr.
-  Notifier_var server_;
+  IDL::traits<Notifier>::ref_type server_;
 
   /// The consumer object.
   Consumer_i* consumer_servant_;
 
   /// Pointer to the consumer object registered with the ORB.
-  Callback_Quoter::Consumer_var consumer_var_;
+  IDL::traits<Callback_Quoter::Consumer>::ref_type consumer_var_;
 
   /// This method gives the reactor pointer.
   ACE_Reactor* reactor_used () const;
@@ -83,7 +83,7 @@ public:
 
 private:
   /// Our orb.
-  CORBA::ORB_var orb_;
+  IDL::traits<CORBA::ORB>::ref_type orb_;
 
   /// Function to read the server IOR from a file.
   int read_ior (ACE_TCHAR* filename);

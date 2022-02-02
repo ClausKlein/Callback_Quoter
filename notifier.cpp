@@ -6,7 +6,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR* argv[])
 {
   Notifier_Input_Handler notifier;
 
-  ACE_DEBUG ((LM_DEBUG, "\n\tNotifier\n\n"));
+  // ACE_DEBUG ((LM_DEBUG, "\n\tNotifier\n\n"));
 
   try
   {

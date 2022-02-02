@@ -11,9 +11,9 @@
 
 #include "Consumer_Handler.h"
 
-#include "tao/ORB.h"
-#include "tao/ORB_Core.h"
-#include "tao/debug.h"
+// XXX #include "tao/ORB.h"
+// XXX #include "tao/ORB_Core.h"
+// XXX #include "tao/debug.h"
 
 #include "ace/Event_Handler.h"
 #include "ace/Get_Opt.h"
@@ -41,7 +41,7 @@ Consumer_Handler::~Consumer_Handler (void)
   {
     if (ACE_Event_Handler::remove_stdin_handler (this->orb_->orb_core ()->reactor (),
                                                  this->orb_->orb_core ()->thr_mgr ()) == -1)
-      ACE_ERROR ((LM_ERROR, "%p\n", "remove_stdin_handler"));
+    // ACE_ERROR ((LM_ERROR, "%p\n", "remove_stdin_handler"));
   }
 }
 
@@ -138,7 +138,7 @@ int Consumer_Handler::via_naming_service (void)
   try
   {
     // Initialization of the naming service.
-    if (naming_services_client_.init (orb_.in ()) != 0)
+    if (naming_services_client_.init (orb_) != 0)
       ACE_ERROR_RETURN ((LM_ERROR,
                          " (%P|%t) Unable to initialize "
                          "the TAO_Naming_Client.\n"),
@@ -148,11 +148,11 @@ int Consumer_Handler::via_naming_service (void)
     notifier_ref_name.length (1);
     notifier_ref_name[0].id = CORBA::string_dup ("Notifier");
 
-    CORBA::Object_var notifier_obj = this->naming_services_client_->resolve (notifier_ref_name);
+    IDL::traits<CORBA::Object>::ref_type notifier_obj = this->naming_services_client_->resolve (notifier_ref_name);
 
     // The CORBA::Object_var object is downcast to Notifier_var using
-    // the <_narrow> method.
-    this->server_ = Notifier::_narrow (notifier_obj.in ());
+    // the <narrow> method.
+    this->server_ = Notifier::narrow (notifier_obj);
   }
   catch (const CORBA::Exception& ex)
   {
@@ -184,11 +184,8 @@ int Consumer_Handler::init (int argc, ACE_TCHAR** argv)
 
     if (this->interactive_ == 1)
     {
-      ACE_DEBUG ((LM_DEBUG,
-                  " Services provided:\n"
-                  " * Registration <type 'r'>\n"
-                  " * Unregistration <type 'u'>\n"
-                  " * Quit <type 'q'>\n"));
+      // ACE_DEBUG ((LM_DEBUG, " Services provided:\n" " * Registration <type 'r'>\n" " * Unregistration <type 'u'>\n" " *
+      // Quit <type 'q'>\n"));
 
       ACE_NEW_RETURN (consumer_input_handler_, Consumer_Input_Handler (this), -1);
 
@@ -214,13 +211,13 @@ int Consumer_Handler::init (int argc, ACE_TCHAR** argv)
       if (this->ior_ == 0)
         ACE_ERROR_RETURN ((LM_ERROR, "%s: no ior specified\n", this->argv_[0]), -1);
 
-      CORBA::Object_var server_object = this->orb_->string_to_object (this->ior_);
+      IDL::traits<CORBA::Object>::ref_type server_object = this->orb_->string_to_object (this->ior_);
 
-      if (CORBA::is_nil (server_object.in ()))
+      if (CORBA::is_nil (server_object))
         ACE_ERROR_RETURN ((LM_ERROR, "invalid ior <%s>\n", this->ior_), -1);
       // The downcasting from CORBA::Object_var to Notifier_var is
-      // done using the <_narrow> method.
-      this->server_ = Notifier::_narrow (server_object.in ());
+      // done using the <narrow> method.
+      this->server_ = Notifier::narrow (server_object);
     }
   }
   catch (const CORBA::Exception& ex)
@@ -238,17 +235,17 @@ int Consumer_Handler::run (void)
   try
   {
     // Obtain and activate the RootPOA.
-    CORBA::Object_var obj = this->orb_->resolve_initial_references ("RootPOA");
+    IDL::traits<CORBA::Object>::ref_type obj = this->orb_->resolve_initial_references ("RootPOA");
 
-    PortableServer::POA_var root_poa = PortableServer::POA::_narrow (obj.in ());
+    IDL::traits<PortableServer::POA>::ref_type root_poa = PortableServer::POA::narrow (obj);
 
-    PortableServer::POAManager_var poa_manager = root_poa->the_POAManager ();
+    IDL::traits<PortableServer::POAManager>::ref_type poa_manager = root_poa->the_POAManager ();
 
     poa_manager->activate ();
 
     ACE_NEW_RETURN (this->consumer_servant_, Consumer_i (), -1);
     // Set the orb in the consumer_ object.
-    this->consumer_servant_->orb (this->orb_.in ());
+    this->consumer_servant_->orb (this->orb_);
 
     // Get the consumer stub (i.e consumer object) pointer.
     this->consumer_var_ = this->consumer_servant_->_this ();
@@ -257,13 +254,13 @@ int Consumer_Handler::run (void)
     {
 
       // Register with the server.
-      this->server_->register_callback (this->stock_name_.c_str (), this->threshold_value_, this->consumer_var_.in ());
+      this->server_->register_callback (this->stock_name_.c_str (), this->threshold_value_, this->consumer_var_);
 
       // Note the registration.
       this->registered_ = 1;
       this->unregistered_ = 0;
 
-      ACE_DEBUG ((LM_DEBUG, "registeration done!\n"));
+      // ACE_DEBUG ((LM_DEBUG, "registeration done!\n"));
     }
 
     // Run the ORB.

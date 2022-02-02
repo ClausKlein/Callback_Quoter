@@ -15,9 +15,9 @@
 #include "NotifierS.h"
 #include "Notifier_i.h"
 #include "ace/Event_Handler.h"
-#include "orbsvcs/CosNamingS.h"
-#include "orbsvcs/Naming/Naming_Client.h"
-#include "tao/Utils/ORB_Manager.h"
+#include "orbsvcs/orbsvcs/Naming/Naming_Client.h"
+#include "orbsvcs/orbsvcs/naming_server/CosNamingS.h"
+// FIXME #include "tao/Utils/ORB_Manager.h"
 
 /**
  * @class Notifier_Input_Handler
@@ -49,7 +49,7 @@ public:
 
 private:
   /// The tao orb manager object.
-  TAO_ORB_Manager orb_manager_;
+  // FIXME TAO_ORB_Manager orb_manager_;
 
   /// Parses the command line arguments.
   int parse_args (void);

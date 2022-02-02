@@ -13,8 +13,9 @@
 #include "ace/Get_Opt.h"
 #include "ace/OS_NS_ctype.h"
 #include "ace/OS_NS_unistd.h"
-#include "tao/ORB_Core.h"
-#include "tao/debug.h"
+#include "tao/x11/orb.h"
+// XXX #include "tao/ORB_Core.h"
+//#include "tao/debug.h"
 
 // Constructor.
 
@@ -31,9 +32,11 @@ Notifier_Input_Handler::~Notifier_Input_Handler (void)
 {
   // Make sure to cleanup the STDIN handler.
 
+#if 0
   if (ACE_Event_Handler::remove_stdin_handler (this->notifier_i_.orb_->orb_core ()->reactor (),
                                                this->notifier_i_.orb_->orb_core ()->thr_mgr ()) == -1)
-    ACE_ERROR ((LM_ERROR, "%p\n", "remove_stdin_handler"));
+    //ACE_ERROR ((LM_ERROR, "%p\n", "remove_stdin_handler"));
+#endif
 }
 
 // The naming service is initialized and the naming context as well as
@@ -42,26 +45,30 @@ Notifier_Input_Handler::~Notifier_Input_Handler (void)
 int Notifier_Input_Handler::init_naming_service (void)
 {
 
-  CORBA::ORB_var orb = this->orb_manager_.orb ();
+// FIMXE: TODO
+#if 0
+  IDL::traits<CORBA::ORB>::ref_type orb = this->orb_manager_.orb ();
 
-  if (this->naming_server_.init (orb.in ()) == -1)
+  if (this->naming_server_.init (orb) == -1)
     return -1;
 
   // create the name for the naming service
   CosNaming::Name notifier_obj_name (1);
   notifier_obj_name.length (1);
-  notifier_obj_name[0].id = CORBA::string_dup ("Notifier");
+  notifier_obj_name[0].id = std::string("Notifier");
 
   // (re)Bind the object.
   try
   {
-    Notifier_var notifier_obj = notifier_i_._this ();
+    IDL::traits<Notifier>::ref_type notifier_obj = notifier_i_._this ();
 
     this->orb_manager_.activate_poa_manager ();
 
-    naming_server_->rebind (notifier_obj_name, notifier_obj.in ());
+    naming_server_->rebind (notifier_obj_name, notifier_obj);
   }
   catch (const CosNaming::NamingContext::AlreadyBound&)
+#endif
+
   {
     ACE_ERROR_RETURN ((LM_ERROR, "Unable to bind %s\n", "Notifier"), -1);
   }
@@ -130,28 +137,28 @@ int Notifier_Input_Handler::init (int argc, ACE_TCHAR* argv[])
   // Register our <Input_Handler> to handle STDIN events, which will
   // trigger the <handle_input> method to process these events.
 
-  CORBA::ORB_var orb = this->orb_manager_.orb ();
+  IDL::traits<CORBA::ORB>::ref_type orb = this->orb_manager_.orb ();
 
   if (ACE_Event_Handler::register_stdin_handler (this, orb->orb_core ()->reactor (), orb->orb_core ()->thr_mgr ()) == -1)
     ACE_ERROR_RETURN ((LM_ERROR, "%p\n", "register_stdin_handler"), -1);
 
   // Stash our ORB pointer for later reference.
-  this->notifier_i_.orb (orb.in ());
+  this->notifier_i_.orb (orb);
 
   // Activate the servant in the POA.
-  CORBA::String_var str = this->orb_manager_.activate_under_child_poa ("Notifier", &this->notifier_i_);
+  auto str = this->orb_manager_.activate_under_child_poa ("Notifier", &this->notifier_i_);
 
-  ACE_DEBUG ((LM_DEBUG, "The IOR is: <%s>\n", str.in ()));
+  // ACE_DEBUG ((LM_DEBUG, "The IOR is: <%s>\n", str));
 
   if (this->ior_output_file_)
   {
-    ACE_OS::fprintf (this->ior_output_file_, "%s", str.in ());
+    ACE_OS::fprintf (this->ior_output_file_, "%s", str);
     ACE_OS::fclose (this->ior_output_file_);
   }
 
   if (this->using_naming_service_)
   {
-    this->init_naming_service ();
+    return this->init_naming_service ();
   }
   return 0;
 }
@@ -160,7 +167,7 @@ int Notifier_Input_Handler::run (void)
 {
   // Run the main event loop for the ORB.
 
-  ACE_DEBUG ((LM_DEBUG, " Type \"q\" to quit \n"));
+  // ACE_DEBUG ((LM_DEBUG, " Type \"q\" to quit \n"));
 
   int result = this->orb_manager_.run ();
 
@@ -186,7 +193,7 @@ int Notifier_Input_Handler::handle_input (ACE_HANDLE)
     if (buf[strlen - 1] == '\n')
       buf[strlen - 1] = '\0';
 
-    ACE_DEBUG ((LM_DEBUG, "%s", buf));
+    // ACE_DEBUG ((LM_DEBUG, "%s", buf));
 
     if (ACE_OS::ace_tolower (buf[0]) == 'q')
     {

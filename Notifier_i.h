@@ -33,7 +33,7 @@
  * The implementation of the Notifier class, which is the servant
  * object for the callback quoter server.
  */
-class Notifier_i : public POA_Notifier
+class Notifier_i : public POA::Notifier
 {
 public:
   /// Constructor.
@@ -45,17 +45,17 @@ public:
   /// Register a distributed callback handler that is invoked when the
   /// given stock reaches the desired threshold value.
   virtual void register_callback (const char* stock_name,
-                                  CORBA::Long threshold_value,
-                                  Callback_Quoter::Consumer_ptr consumer_handler);
+                                  uint32_t threshold_value,
+                                  Callback_Quoter::Consumer::_ref_type consumer_handler);
 
   /// Remove the consumer object.
-  virtual void unregister_callback (Callback_Quoter::Consumer_ptr consumer_handler);
+  virtual void unregister_callback (Callback_Quoter::Consumer::_ref_type consumer_handler);
 
   /// Get the market status.
-  virtual void market_status (const char* stock_name, CORBA::Long stock_value);
+  virtual void market_status (const char* stock_name, uint32_t stock_value);
 
   /// Get the orb pointer.
-  void orb (CORBA::ORB_ptr orb);
+  void orb (CORBA::ORB::_ref_type orb);
 
   /// Shutdown the Notifier.
   virtual void shutdown (void);
@@ -66,7 +66,7 @@ public:
   // private:
 public:
   /// The ORB manager.
-  CORBA::ORB_var orb_;
+  IDL::traits<CORBA::ORB>::ref_type orb_;
 
   /**
    * @class Consumer_Data
@@ -80,10 +80,10 @@ public:
     bool operator== (const Consumer_Data& rhs) const;
 
     /// Stores the consumer object reference.
-    Callback_Quoter::Consumer_var consumer_;
+    IDL::traits<Callback_Quoter::Consumer>::ref_type consumer_;
 
     /// Stores the stock threshold value.
-    CORBA::Long desired_value_;
+    uint32_t desired_value_;
   };
 
   typedef ACE_Unbounded_Set<Consumer_Data> CONSUMERS;

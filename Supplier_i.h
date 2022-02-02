@@ -57,7 +57,7 @@ public:
 
 private:
   /// Remember our orb.
-  CORBA::ORB_var orb_;
+  IDL::traits<CORBA::ORB>::ref_type orb_;
 
   /// Function to read the Notifier IOR from a file.
   int read_ior (ACE_TCHAR* filename);
@@ -93,7 +93,7 @@ private:
   int use_naming_service_;
 
   /// Notifier object reference.
-  Notifier_var notifier_;
+  IDL::traits<Notifier>::ref_type notifier_;
 
   /// The pointer for accessing the input stream.
   FILE* f_ptr_;
