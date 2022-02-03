@@ -39,14 +39,14 @@ public:
   Supplier_Timer_Handler (Supplier* supplier, ACE_Reactor* reactor, FILE* file_ptr);
 
   /// Destructor.
-  ~Supplier_Timer_Handler (void);
+  ~Supplier_Timer_Handler ();
 
   /// Method which will be called by the Reactor when timeout occurs.
   int handle_timeout (const ACE_Time_Value& tv, const void* arg = 0) override;
 
 private:
   /// The values of the stock and its rate are got from the file.
-  int get_stock_information (void);
+  int get_stock_information ();
 
   /// The supplier instance.
   Supplier* supplier_obj_;

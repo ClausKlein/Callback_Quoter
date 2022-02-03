@@ -28,16 +28,16 @@ class Consumer_i : public Callback_Quoter::POA::Consumer
 {
 public:
   /// Constructor.
-  Consumer_i (void);
+  Consumer_i ();
 
   /// Destructor.
-  ~Consumer_i (void);
+  ~Consumer_i ();
 
   /// Gets the stock information from the Notifier.
   void push (const Callback_Quoter::Info& data);
 
   /// Used to get the consumer to shut down.
-  void shutdown (void) override;
+  void shutdown () override;
 
   /// Set the ORB pointer.
   void orb (IDL::traits<CORBA::ORB>::ref_type o);

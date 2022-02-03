@@ -43,16 +43,16 @@ class Consumer_Handler
 {
 public:
   /// Constructor.
-  Consumer_Handler (void);
+  Consumer_Handler ();
 
   /// Destructor.
-  ~Consumer_Handler (void);
+  ~Consumer_Handler ();
 
   /// Initialize the client communication with the server.
   int init (int argc, ACE_TCHAR* argv[]);
 
   /// Start the ORB object.
-  int run (void);
+  int run ();
 
   /// the name of the stock the consumer is interested in.
   std::string stock_name_;
@@ -89,11 +89,11 @@ private:
 
   /// Parse the command line arguments.  Returns 0 on success, -1 on
   /// error.
-  int parse_args (void);
+  int parse_args ();
 
   /// This method initialises the naming service and registers the
   /// object with the POA.
-  int via_naming_service (void);
+  int via_naming_service ();
 
   /// # of arguments on the command line.
   int argc_;

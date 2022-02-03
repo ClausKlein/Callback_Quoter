@@ -48,13 +48,13 @@ public:
   int handle_input (ACE_HANDLE) override;
 
   /// Registration with the notifier.
-  int register_consumer (void);
+  int register_consumer ();
 
   /// Cancelling the registration with the notifier.
-  int unregister_consumer (void);
+  int unregister_consumer ();
 
   /// Ends the consumer process.
-  int quit_consumer_process (void);
+  int quit_consumer_process ();
 
   enum
   {
@@ -81,7 +81,7 @@ public:
 
 protected:
   /// the destructor.
-  ~Consumer_Input_Handler (void);
+  ~Consumer_Input_Handler ();
 
 private:
   /// The Consumer_Handler object.

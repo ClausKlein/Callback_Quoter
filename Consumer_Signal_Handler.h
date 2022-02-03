@@ -47,11 +47,11 @@ public:
 protected:
   /// Protected destructor so that the signal handler is always created
   /// dynamically and hence the heap doesnt get corrupted.
-  ~Consumer_Signal_Handler (void);
+  ~Consumer_Signal_Handler ();
 
 private:
   /// Exit gracefully on a signal.
-  int quit_on_signal (void);
+  int quit_on_signal ();
 
   /// Reference to the Consumer_Handler which is used in accessing the
   /// servant methods.

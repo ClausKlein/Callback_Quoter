@@ -1,0 +1,9 @@
+---
+Checks:          'clang-diagnostic-*,clang-analyzer-*,-*,cert-*,hicpp-*,modernize-*,readability-*,portability-*,performance-*'
+WarningsAsErrors: 'clang-analyzer-*'
+HeaderFilterRegex: ''
+AnalyzeTemporaryDtors: false
+FormatStyle:     file
+User:            klein_cl
+...
+

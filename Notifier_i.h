@@ -37,10 +37,10 @@ class Notifier_i : public POA::Notifier
 {
 public:
   /// Constructor.
-  Notifier_i (void);
+  Notifier_i ();
 
   /// Destructor.
-  ~Notifier_i (void);
+  ~Notifier_i ();
 
   /// Register a distributed callback handler that is invoked when the
   /// given stock reaches the desired threshold value.
@@ -58,7 +58,7 @@ public:
   void orb (CORBA::ORB::_ref_type orb);
 
   /// Shutdown the Notifier.
-  void shutdown (void) override;
+  void shutdown () override;
 
   // CONSUMER_MAP* get_consumer_map_ptr ();
   // Returns the consumer map ptr.
