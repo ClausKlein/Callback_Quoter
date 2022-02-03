@@ -53,13 +53,17 @@ int Consumer_Handler::read_ior (ACE_TCHAR* filename)
   ACE_HANDLE f_handle = ACE_OS::open (filename, 0);
 
   if (f_handle == ACE_INVALID_HANDLE)
+  {
     ACE_ERROR_RETURN ((LM_ERROR, "Unable to open %s for reading: %p\n", filename), -1);
+  }
 
   ACE_Read_Buffer ior_buffer (f_handle);
   char* data = ior_buffer.read ();
 
   if (data == nullptr)
+  {
     ACE_ERROR_RETURN ((LM_ERROR, "Unable to read ior: %p\n"), -1);
+  }
 
   this->ior_ = ACE_OS::strdup (ACE_TEXT_CHAR_TO_TCHAR (data));
   ior_buffer.alloc ()->free (data);
@@ -91,7 +95,9 @@ int Consumer_Handler::parse_args ()
       case 'f': // read the IOR from the file.
         result = this->read_ior (get_opts.opt_arg ());
         if (result < 0)
+        {
           ACE_ERROR_RETURN ((LM_ERROR, "Unable to read ior from %s : %p\n", get_opts.opt_arg ()), -1);
+        }
         break;
 
       case 's': // don't use the naming service
@@ -136,26 +142,26 @@ int Consumer_Handler::parse_args ()
 int Consumer_Handler::via_naming_service ()
 {
 #if 0
-  try
-  {
-    // Initialization of the naming service.
-    if (naming_services_client_.init (orb_) != 0)
-      ACE_ERROR_RETURN ((LM_ERROR,
-                         " (%P|%t) Unable to initialize "
-                         "the TAO_Naming_Client.\n"),
-                        -1);
+    try
+    {
+        // Initialization of the naming service.
+        if (naming_services_client_.init (orb_) != 0)
+            ACE_ERROR_RETURN ((LM_ERROR,
+                               " (%P|%t) Unable to initialize "
+                               "the TAO_Naming_Client.\n"),
+                              -1);
 
-    CosNaming::Name notifier_ref_name (1);
-    notifier_ref_name.length (1);
-    notifier_ref_name[0].id = CORBA::string_dup ("Notifier");
+        CosNaming::Name notifier_ref_name (1);
+        notifier_ref_name.length (1);
+        notifier_ref_name[0].id = CORBA::string_dup ("Notifier");
 
-    IDL::traits<CORBA::Object>::ref_type notifier_obj = this->naming_services_client_->resolve (notifier_ref_name);
+        IDL::traits<CORBA::Object>::ref_type notifier_obj = this->naming_services_client_->resolve (notifier_ref_name);
 
-    // The CORBA::Object_var object is downcast to Notifier_var using
-    // the <narrow> method.
-    this->server_ = Notifier::narrow (notifier_obj);
-  }
-  catch (const CORBA::Exception& ex)
+        // The CORBA::Object_var object is downcast to Notifier_var using
+        // the <narrow> method.
+        this->server_ = Notifier::narrow (notifier_obj);
+    }
+    catch (const CORBA::Exception& ex)
 #endif
 
   {
@@ -183,7 +189,9 @@ int Consumer_Handler::init (int argc, ACE_TCHAR** argv)
 
     // Parse command line and verify parameters.
     if (this->parse_args () == -1)
+    {
       ACE_ERROR_RETURN ((LM_ERROR, "parse_args failed\n"), -1);
+    }
 
     if (this->interactive_ == 1)
     {
@@ -200,24 +208,32 @@ int Consumer_Handler::init (int argc, ACE_TCHAR** argv)
       ACE_NEW_RETURN (consumer_signal_handler_, Consumer_Signal_Handler (this), -1);
 
       if (this->reactor_used ()->register_handler (SIGINT, consumer_signal_handler_) == -1)
+      {
         ACE_ERROR_RETURN ((LM_ERROR, "%p\n", "register_handler for SIGINT"), -1);
+      }
     }
     // use the naming service.
     if (this->use_naming_service_)
     {
       if (via_naming_service () == -1)
+      {
         ACE_ERROR_RETURN ((LM_ERROR, "via_naming_service failed\n"), -1);
+      }
     }
     else
     {
 
       if (this->ior_ == nullptr)
+      {
         ACE_ERROR_RETURN ((LM_ERROR, "%s: no ior specified\n", this->argv_[0]), -1);
+      }
 
       IDL::traits<CORBA::Object>::ref_type server_object = this->orb_->string_to_object (this->ior_);
 
       if (server_object == nullptr)
+      {
         ACE_ERROR_RETURN ((LM_ERROR, "invalid ior <%s>\n", this->ior_), -1);
+      }
       // The downcasting from CORBA::Object_var to Notifier_var is
       // done using the <narrow> method.
       this->server_ = IDL::traits<Notifier>::narrow (server_object);

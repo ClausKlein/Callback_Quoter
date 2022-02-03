@@ -50,13 +50,17 @@ int Supplier::read_ior (ACE_TCHAR* filename)
   ACE_HANDLE f_handle = ACE_OS::open (filename, 0);
 
   if (f_handle == ACE_INVALID_HANDLE)
+  {
     ACE_ERROR_RETURN ((LM_ERROR, "Unable to open %s for reading\n", filename), -1);
+  }
 
   ACE_Read_Buffer ior_buffer (f_handle);
   char* data = ior_buffer.read ();
 
   if (data == nullptr)
+  {
     ACE_ERROR_RETURN ((LM_ERROR, "Unable to read ior\n"), -1);
+  }
 
   this->ior_ = ACE_OS::strdup (ACE_TEXT_CHAR_TO_TCHAR (data));
   ior_buffer.alloc ()->free (data);
@@ -89,7 +93,9 @@ int Supplier::parse_args ()
       case 'i': // Stock market information is got from a file.
         result = this->read_file (get_opts.opt_arg ());
         if (result < 0)
+        {
           ACE_ERROR_RETURN ((LM_ERROR, "Unable to read stock information from %s : %p\n", get_opts.opt_arg ()), -1);
+        }
         break;
 
       case 'k': // Ior provide on command line
@@ -99,7 +105,9 @@ int Supplier::parse_args ()
       case 'f': // Read the IOR from the file.
         result = this->read_ior (get_opts.opt_arg ());
         if (result < 0)
+        {
           ACE_ERROR_RETURN ((LM_ERROR, "Unable to read ior from %s : %p\n", get_opts.opt_arg ()), -1);
+        }
         break;
 
       case 's': // Don't use the naming service
@@ -165,7 +173,9 @@ int Supplier::run ()
   // "Your time starts now!" ;) the timer is scheduled to begin work.
   timer_id = reactor_used ()->schedule_timer (supplier_timer_handler_, "Periodic stockfeed", period, period);
   if (timer_id == -1)
+  {
     ACE_ERROR_RETURN ((LM_ERROR, "%p\n", "schedule_timer"), -1);
+  }
 
   // The reactor starts executing in a loop.
   return this->reactor_used ()->run_reactor_event_loop ();
@@ -175,30 +185,30 @@ int Supplier::via_naming_service ()
 {
 // TODO: refactory! CK
 #if 0
-  try
-  {
-    // Initialization of the naming service.
-    if (naming_services_client_.init (orb_) != 0)
-      ACE_ERROR_RETURN ((LM_ERROR,
-                         " (%P|%t) Unable to initialize "
-                         "the TAO_Naming_Client.\n"),
-                        -1);
-    CosNaming::Name notifier_ref_name (1);
-    notifier_ref_name.length (1);
-    notifier_ref_name[0].id = CORBA::string_dup ("Notifier");
+    try
+    {
+        // Initialization of the naming service.
+        if (naming_services_client_.init (orb_) != 0)
+            ACE_ERROR_RETURN ((LM_ERROR,
+                               " (%P|%t) Unable to initialize "
+                               "the TAO_Naming_Client.\n"),
+                              -1);
+        CosNaming::Name notifier_ref_name (1);
+        notifier_ref_name.length (1);
+        notifier_ref_name[0].id = CORBA::string_dup ("Notifier");
 
-    IDL::traits<CORBA::Object>::ref_type notifier_obj = this->naming_services_client_->resolve (notifier_ref_name);
+        IDL::traits<CORBA::Object>::ref_type notifier_obj = this->naming_services_client_->resolve (notifier_ref_name);
 
-    // The CORBA::Object_var object is downcast to Notifier_var
-    // using the <_narrow> method.
-    this->notifier_ = Notifier::_narrow (notifier_obj);
-  }
-  catch (const CORBA::SystemException& sysex)
-  {
-    //TODO sysex._tao_print_exception ("System Exception : Supplier::via_naming_service\n");
-    return -1;
-  }
-  catch (const CORBA::UserException& userex)
+        // The CORBA::Object_var object is downcast to Notifier_var
+        // using the <_narrow> method.
+        this->notifier_ = Notifier::_narrow (notifier_obj);
+    }
+    catch (const CORBA::SystemException& sysex)
+    {
+        //TODO sysex._tao_print_exception ("System Exception : Supplier::via_naming_service\n");
+        return -1;
+    }
+    catch (const CORBA::UserException& userex)
 #endif
 
   {
@@ -223,20 +233,28 @@ int Supplier::init (int argc, ACE_TCHAR** argv)
 
     // Parse command line and verify parameters.
     if (this->parse_args () == -1)
+    {
       return -1;
+    }
 
     // Create the Timer_Handler.
     ACE_NEW_RETURN (supplier_timer_handler_, Supplier_Timer_Handler (this, this->reactor_used (), this->f_ptr_), -1);
 
     if (this->use_naming_service_)
+    {
       return via_naming_service ();
+    }
 
     if (this->ior_ == nullptr)
+    {
       ACE_ERROR_RETURN ((LM_ERROR, "%s: no ior specified\n", this->argv_[0]), -1);
+    }
     IDL::traits<CORBA::Object>::ref_type notifier_object = this->orb_->string_to_object (this->ior_);
 
     if (notifier_object == nullptr)
+    {
       ACE_ERROR_RETURN ((LM_ERROR, "invalid ior <%s>\n", this->ior_), -1);
+    }
     // The downcasting from CORBA::Object_var to Notifier_var is
     // done using the <_narrow> method.
     this->notifier_ = IDL::traits<Notifier>::narrow (notifier_object);
@@ -270,6 +288,8 @@ int Supplier::read_file (ACE_TCHAR* filename)
 
   // the stock values are to be read from a file.
   if (f_ptr_ == nullptr)
+  {
     ACE_ERROR_RETURN ((LM_ERROR, "Unable to open %s for writing: %p\n", filename), -1);
+  }
   return 0;
 }

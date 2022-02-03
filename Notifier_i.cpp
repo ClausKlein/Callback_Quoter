@@ -51,7 +51,9 @@ void Notifier_i::register_callback (const std::string& stock_name,
   if (this->consumer_map_.find (stock_name.c_str (), consumers) == 0)
   {
     if (consumers->insert (consumer_data) == -1)
+    {
       throw Callback_Quoter::Invalid_Stock ("Insertion failed! Invalid Stock!\n");
+    }
     else
     // ACE_DEBUG ((LM_DEBUG, "Inserted map entry: stockname %s threshold %d",
     // stock_name.c_str(), threshold_value));
@@ -64,7 +66,9 @@ void Notifier_i::register_callback (const std::string& stock_name,
     // When a new entry is tried to be inserted into the unbounded set and it
     // fails an exception is raised.
     if (consumers->insert (consumer_data) == -1)
+    {
       throw Callback_Quoter::Invalid_Stock ("Insertion failed! Invalid Stock!\n");
+    }
 
     // The bond between the stockname <hash_key> and the consumers <hash_value>
     // is fused.
@@ -72,7 +76,7 @@ void Notifier_i::register_callback (const std::string& stock_name,
       ; // ACE_ERROR ((LM_ERROR, "register_callback: Bind failed!/n"));
     else
       ; // ACE_DEBUG ((LM_DEBUG, "new map entry: stockname %s threshold %d\n",
-    // stock_name.c_str(), threshold_value));
+        // stock_name.c_str(), threshold_value));
   }
 }
 
@@ -96,7 +100,9 @@ void Notifier_i::unregister_callback (taox11::CORBA::object_traits<Callback_Quot
   // Check to see whether the hash_map still exists. Chances are there
   // that the notifier has exited closing the hash map.
   if (notifier_exited_ == 1)
+  {
     return;
+  }
 
   for (CONSUMER_MAP::ITERATOR iter = this->consumer_map_.begin (); iter != this->consumer_map_.end (); ++iter)
   {
@@ -114,7 +120,9 @@ void Notifier_i::unregister_callback (taox11::CORBA::object_traits<Callback_Quot
     // removed an exception is raised.
 
     if ((*iter).int_id_->remove (consumer_to_remove) == -1)
+    {
       throw Callback_Quoter::Invalid_Handle ("Unregistration failed! Invalid Consumer Handle!\n");
+    }
     else
     // ACE_DEBUG ((LM_DEBUG, "unregister_callback:consumer removed\n"));
   }
@@ -165,9 +173,11 @@ void Notifier_i::shutdown (void)
   if (this->consumer_map_.close () > 0)
     ; // ACE_ERROR ((LM_ERROR, "Consumer_map_close error!\n"));
   else
-    // This marks the exit of the notifier. This should be taken care of
-    // before the consumer tries to unregister after the notifier quits.
+  // This marks the exit of the notifier. This should be taken care of
+  // before the consumer tries to unregister after the notifier quits.
+  {
     notifier_exited_ = 1;
+  }
 
   // ACE_DEBUG ((LM_DEBUG, "The Callback Quoter server is shutting down...\n"));
 

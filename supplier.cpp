@@ -9,7 +9,11 @@ int ACE_TMAIN (int argc, ACE_TCHAR* argv[])
   // ACE_DEBUG ((LM_DEBUG, "\n\tMarket Status Supplier Daemon\n\n"));
 
   if (supplier.init (argc, argv) == -1)
+  {
     return -1;
+  }
   else
+  {
     return supplier.run ();
+  }
 }
