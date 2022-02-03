@@ -4,7 +4,8 @@
 /**
  *  @file    Consumer_Input_Handler.h
  *
- *  Definition of the Callback_Qouter Consumer Client class, Consumer_Input_Handler.
+ *  Definition of the Callback_Qouter Consumer Client class,
+ * Consumer_Input_Handler.
  *
  *  @author Kirthika Parameswaran <kirthika@cs.wustl.edu>
  */
@@ -44,7 +45,7 @@ public:
   Consumer_Input_Handler (Consumer_Handler* consumer_handler);
 
   /// Handle the user input.
-  int handle_input (ACE_HANDLE);
+  int handle_input (ACE_HANDLE) override;
 
   /// Registration with the notifier.
   int register_consumer (void);

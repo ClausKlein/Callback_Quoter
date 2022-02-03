@@ -37,7 +37,7 @@ public:
   void push (const Callback_Quoter::Info& data);
 
   /// Used to get the consumer to shut down.
-  virtual void shutdown (void);
+  void shutdown (void) override;
 
   /// Set the ORB pointer.
   void orb (IDL::traits<CORBA::ORB>::ref_type o);

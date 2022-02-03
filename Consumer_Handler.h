@@ -22,8 +22,7 @@
 #  pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include "orbsvcs/orbsvcs/Naming/Naming_Client.h"
-#include "orbsvcs/orbsvcs/naming_server/CosNamingC.h"
+#include "Naming_Client.h"
 
 #include "Consumer_Input_Handler.h"
 #include "Consumer_Signal_Handler.h"
@@ -56,7 +55,7 @@ public:
   int run (void);
 
   /// the name of the stock the consumer is interested in.
-  ACE_CString stock_name_;
+  std::string stock_name_;
 
   /// the desired price of the stock.
   int threshold_value_;
@@ -110,7 +109,7 @@ private:
 
   /// An instance of the name client used for resolving the factory
   /// objects.
-  TAO_Naming_Client naming_services_client_;
+  // XXX TAO_Naming_Client naming_services_client_;
 
   /// This variable denotes whether the naming service
   /// is used or not.

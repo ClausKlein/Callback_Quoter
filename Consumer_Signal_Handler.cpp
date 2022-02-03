@@ -16,7 +16,7 @@ Consumer_Signal_Handler::Consumer_Signal_Handler (Consumer_Handler* consumer_han
   : consumer_handler_ (consumer_handler)
 {}
 
-Consumer_Signal_Handler::~Consumer_Signal_Handler (void)
+Consumer_Signal_Handler::~Consumer_Signal_Handler ()
 {}
 
 // Method to handle the ^C signal.
@@ -38,7 +38,7 @@ int Consumer_Signal_Handler::handle_close (ACE_HANDLE, ACE_Reactor_Mask)
   return 0;
 }
 
-int Consumer_Signal_Handler::quit_on_signal (void)
+int Consumer_Signal_Handler::quit_on_signal ()
 {
   // Only if the consumer is registered and wants to shut down, its
   // necessary to unregister and then shutdown.
@@ -54,7 +54,7 @@ int Consumer_Signal_Handler::quit_on_signal (void)
   }
   catch (const CORBA::Exception& ex)
   {
-    ex._tao_print_exception ("Consumer_Input_Handler::quit_consumer_process()");
+    // TODO ex._tao_print_exception ("Consumer_Input_Handler::quit_consumer_process()");
     return -1;
   }
 

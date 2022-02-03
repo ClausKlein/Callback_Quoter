@@ -98,7 +98,7 @@ int Consumer_Input_Handler::register_consumer ()
   }
   catch (const CORBA::Exception& ex)
   {
-    ex._tao_print_exception ("Consumer_Input_Handler::register_consumer()\n");
+    // TODO ex._tao_print_exception ("Consumer_Input_Handler::register_consumer()\n");
     return -1;
   }
 
@@ -117,11 +117,13 @@ int Consumer_Input_Handler::unregister_consumer ()
     // ACE_DEBUG ((LM_DEBUG, " Consumer Unregistered \n"));
     consumer_handler_->unregistered_ = 1;
     consumer_handler_->registered_ = 0;
+    return 0;
   }
   else
-    // ACE_DEBUG ((LM_DEBUG, " Invalid Operation: Consumer not Registered\n"));
-
-    return 0;
+  {
+    ; // ACE_DEBUG ((LM_DEBUG, " Invalid Operation: Consumer not Registered\n"));
+    return -1;
+  }
 }
 
 int Consumer_Input_Handler::quit_consumer_process ()
@@ -149,7 +151,7 @@ int Consumer_Input_Handler::quit_consumer_process ()
     // There would be an exception only if there is a communication
     // failure between the notifier and consumer. On catching the
     // exception proclaim the problem and do a graceful exit.
-    ex._tao_print_exception ("Communication failed!\n");
+    // TODO ex._tao_print_exception ("Communication failed!\n");
 
     try
     {
@@ -165,7 +167,7 @@ int Consumer_Input_Handler::quit_consumer_process ()
   return 0;
 }
 
-Consumer_Input_Handler::~Consumer_Input_Handler (void)
+Consumer_Input_Handler::~Consumer_Input_Handler ()
 {
   // No-op
 }

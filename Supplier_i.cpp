@@ -20,18 +20,18 @@
 
 // Constructor.
 
-Supplier::Supplier (void)
-  : ior_ (0)
+Supplier::Supplier ()
+  : ior_ (nullptr)
   , use_naming_service_ (1)
   , notifier_ ()
-  , f_ptr_ (0)
+  , f_ptr_ (nullptr)
   , loop_count_ (10)
   , period_value_ (1)
 {
   // No-op.
 }
 
-Supplier::~Supplier (void)
+Supplier::~Supplier ()
 {
   // Release the memory allocated for ior_.
   ACE_OS::free (this->ior_);
@@ -55,7 +55,7 @@ int Supplier::read_ior (ACE_TCHAR* filename)
   ACE_Read_Buffer ior_buffer (f_handle);
   char* data = ior_buffer.read ();
 
-  if (data == 0)
+  if (data == nullptr)
     ACE_ERROR_RETURN ((LM_ERROR, "Unable to read ior\n"), -1);
 
   this->ior_ = ACE_OS::strdup (ACE_TEXT_CHAR_TO_TCHAR (data));
@@ -68,7 +68,7 @@ int Supplier::read_ior (ACE_TCHAR* filename)
 
 // Parses the command line arguments and returns an error status.
 
-int Supplier::parse_args (void)
+int Supplier::parse_args ()
 {
   ACE_Get_Opt get_opts (argc_, argv_, ACE_TEXT ("dn:f:i:xk:xs"));
 
@@ -78,8 +78,8 @@ int Supplier::parse_args (void)
   while ((c = get_opts ()) != -1)
     switch (c)
     {
-      case 'd':            // Debug flag
-        TAO_debug_level++; //****
+      case 'd': // Debug flag
+        // TODO TAO_debug_level++; //****
         break;
 
       case 'n': // Period_value: time between two successive stockfeeds.
@@ -139,12 +139,12 @@ int Supplier::send_market_status (const char* stock_name, long value)
   }
   catch (const CORBA::SystemException& sysex)
   {
-    sysex._tao_print_exception ("System Exception : Supplier::send_market_status");
+    // TODO sysex._tao_print_exception ("System Exception : Supplier::send_market_status");
     return -1;
   }
   catch (const CORBA::UserException& userex)
   {
-    userex._tao_print_exception ("User Exception : Supplier::send_market_status");
+    // TODO userex._tao_print_exception ("User Exception : Supplier::send_market_status");
     return -1;
   }
   return 0;
@@ -152,7 +152,7 @@ int Supplier::send_market_status (const char* stock_name, long value)
 
 // Execute client example code.
 
-int Supplier::run (void)
+int Supplier::run ()
 {
 
   long timer_id = 0;
@@ -171,9 +171,10 @@ int Supplier::run (void)
   return this->reactor_used ()->run_reactor_event_loop ();
 }
 
-int Supplier::via_naming_service (void)
+int Supplier::via_naming_service ()
 {
-
+// TODO: refactory! CK
+#if 0
   try
   {
     // Initialization of the naming service.
@@ -194,12 +195,14 @@ int Supplier::via_naming_service (void)
   }
   catch (const CORBA::SystemException& sysex)
   {
-    sysex._tao_print_exception ("System Exception : Supplier::via_naming_service\n");
+    //TODO sysex._tao_print_exception ("System Exception : Supplier::via_naming_service\n");
     return -1;
   }
   catch (const CORBA::UserException& userex)
+#endif
+
   {
-    userex._tao_print_exception ("User Exception : Supplier::via_naming_service\n");
+    // TODO userex._tao_print_exception ("User Exception : Supplier::via_naming_service\n");
     return -1;
   }
 
@@ -228,24 +231,24 @@ int Supplier::init (int argc, ACE_TCHAR** argv)
     if (this->use_naming_service_)
       return via_naming_service ();
 
-    if (this->ior_ == 0)
+    if (this->ior_ == nullptr)
       ACE_ERROR_RETURN ((LM_ERROR, "%s: no ior specified\n", this->argv_[0]), -1);
     IDL::traits<CORBA::Object>::ref_type notifier_object = this->orb_->string_to_object (this->ior_);
 
-    if (CORBA::is_nil (notifier_object))
+    if (notifier_object == nullptr)
       ACE_ERROR_RETURN ((LM_ERROR, "invalid ior <%s>\n", this->ior_), -1);
     // The downcasting from CORBA::Object_var to Notifier_var is
     // done using the <_narrow> method.
-    this->notifier_ = Notifier::_narrow (notifier_object);
+    this->notifier_ = IDL::traits<Notifier>::narrow (notifier_object);
   }
   catch (const CORBA::SystemException& sysex)
   {
-    sysex._tao_print_exception ("System Exception : Supplier::init");
+    // TODO sysex._tao_print_exception ("System Exception : Supplier::init");
     return -1;
   }
   catch (const CORBA::UserException& userex)
   {
-    userex._tao_print_exception ("User Exception : Supplier::init");
+    // TODO userex._tao_print_exception ("User Exception : Supplier::init");
     return -1;
   }
 
@@ -266,7 +269,7 @@ int Supplier::read_file (ACE_TCHAR* filename)
   // ACE_DEBUG ((LM_DEBUG, "filename = %s\n", filename));
 
   // the stock values are to be read from a file.
-  if (f_ptr_ == 0)
+  if (f_ptr_ == nullptr)
     ACE_ERROR_RETURN ((LM_ERROR, "Unable to open %s for writing: %p\n", filename), -1);
   return 0;
 }

@@ -85,8 +85,8 @@ int Notifier_Input_Handler::parse_args (void)
   while ((c = get_opts ()) != -1)
     switch (c)
     {
-      case 'd':            // debug flag.
-        TAO_debug_level++; ///*****
+      case 'd': // debug flag.
+        // XXX TAO_debug_level++; ///*****
         break;
 
       case 'f': // output the IOR toi a file.
@@ -126,8 +126,9 @@ int Notifier_Input_Handler::init (int argc, ACE_TCHAR* argv[])
   this->argc_ = argc;
   this->argv_ = argv;
 
-  if (this->orb_manager_.init_child_poa (this->argc_, this->argv_, "child_poa") == -1)
-    ACE_ERROR_RETURN ((LM_ERROR, "%p\n", "init_child_poa"), -1);
+  // FIXME if (this->orb_manager_.init_child_poa (this->argc_, this->argv_,
+  // "child_poa") == -1) ACE_ERROR_RETURN ((LM_ERROR, "%p\n", "init_child_poa"),
+  // -1);
 
   int retval = this->parse_args ();
 
@@ -137,22 +138,25 @@ int Notifier_Input_Handler::init (int argc, ACE_TCHAR* argv[])
   // Register our <Input_Handler> to handle STDIN events, which will
   // trigger the <handle_input> method to process these events.
 
-  IDL::traits<CORBA::ORB>::ref_type orb = this->orb_manager_.orb ();
+  IDL::traits<CORBA::ORB>::ref_type orb; // FIXME = this->orb_manager_.orb ();
 
-  if (ACE_Event_Handler::register_stdin_handler (this, orb->orb_core ()->reactor (), orb->orb_core ()->thr_mgr ()) == -1)
-    ACE_ERROR_RETURN ((LM_ERROR, "%p\n", "register_stdin_handler"), -1);
+  // FIXME if (ACE_Event_Handler::register_stdin_handler (this, orb->orb_core
+  // ()->reactor (), orb->orb_core ()->thr_mgr ()) == -1) ACE_ERROR_RETURN
+  // ((LM_ERROR, "%p\n", "register_stdin_handler"), -1);
 
   // Stash our ORB pointer for later reference.
   this->notifier_i_.orb (orb);
 
   // Activate the servant in the POA.
-  auto str = this->orb_manager_.activate_under_child_poa ("Notifier", &this->notifier_i_);
+  // FIXME auto str = this->orb_manager_.activate_under_child_poa ("Notifier",
+  // &this->notifier_i_);
+  std::string str;
 
   // ACE_DEBUG ((LM_DEBUG, "The IOR is: <%s>\n", str));
 
   if (this->ior_output_file_)
   {
-    ACE_OS::fprintf (this->ior_output_file_, "%s", str);
+    ACE_OS::fprintf (this->ior_output_file_, "%s", str.c_str ());
     ACE_OS::fclose (this->ior_output_file_);
   }
 
@@ -169,7 +173,8 @@ int Notifier_Input_Handler::run (void)
 
   // ACE_DEBUG ((LM_DEBUG, " Type \"q\" to quit \n"));
 
-  int result = this->orb_manager_.run ();
+  // FIXME int result = this->orb_manager_.run ();
+  int result = -1;
 
   if (result == -1)
   {
@@ -204,7 +209,7 @@ int Notifier_Input_Handler::handle_input (ACE_HANDLE)
   }
   catch (const CORBA::Exception& ex)
   {
-    ex._tao_print_exception ("Input_Handler::init");
+    // TODO ex._tao_print_exception ("Input_Handler::init");
     return -1;
   }
 

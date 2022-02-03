@@ -13,12 +13,11 @@
 #ifndef SUPPLIER_I_H
 #define SUPPLIER_I_H
 
+#include "Naming_Client.h"
 #include "NotifierC.h"
 #include "Supplier_Timer_Handler.h"
 #include "ace/Reactor.h"
 #include "ace/Read_Buffer.h"
-#include "orbsvcs/CosNamingC.h"
-#include "orbsvcs/Naming/Naming_Client.h"
 
 #if !defined(ACE_LACKS_PRAGMA_ONCE)
 #  pragma once
@@ -86,7 +85,7 @@ private:
 
   /// An instance of the name client used for resolving the factory
   /// objects.
-  TAO_Naming_Client naming_services_client_;
+  // XXX TAO_Naming_Client naming_services_client_;
 
   /// This variable denotes whether the naming service
   /// is used or not.

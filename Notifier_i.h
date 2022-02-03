@@ -44,21 +44,21 @@ public:
 
   /// Register a distributed callback handler that is invoked when the
   /// given stock reaches the desired threshold value.
-  virtual void register_callback (const char* stock_name,
-                                  uint32_t threshold_value,
-                                  Callback_Quoter::Consumer::_ref_type consumer_handler);
+  void register_callback (const std::string& stock_name,
+                          int32_t threshold_value,
+                          taox11::CORBA::object_traits<Callback_Quoter::Consumer>::ref_type consumer_handler) override;
 
   /// Remove the consumer object.
-  virtual void unregister_callback (Callback_Quoter::Consumer::_ref_type consumer_handler);
+  void unregister_callback (taox11::CORBA::object_traits<Callback_Quoter::Consumer>::ref_type consumer_handler) override;
 
   /// Get the market status.
-  virtual void market_status (const char* stock_name, uint32_t stock_value);
+  void market_status (const std::string& stock_name, int32_t stock_value) override;
 
   /// Get the orb pointer.
   void orb (CORBA::ORB::_ref_type orb);
 
   /// Shutdown the Notifier.
-  virtual void shutdown (void);
+  void shutdown (void) override;
 
   // CONSUMER_MAP* get_consumer_map_ptr ();
   // Returns the consumer map ptr.
@@ -83,15 +83,16 @@ public:
     IDL::traits<Callback_Quoter::Consumer>::ref_type consumer_;
 
     /// Stores the stock threshold value.
-    uint32_t desired_value_;
+    int32_t desired_value_;
   };
 
   typedef ACE_Unbounded_Set<Consumer_Data> CONSUMERS;
 
-  typedef ACE_Hash_Map_Manager<ACE_CString, CONSUMERS*, ACE_Null_Mutex> CONSUMER_MAP;
+  typedef ACE_Hash_Map_Manager<ACE_CString, CONSUMERS, ACE_Null_Mutex> CONSUMER_MAP;
 
   /// This is the hash map with each hash_entry consisting of the stockname
-  /// and an unbounded set of consumer object pointer and the desired stockvalue.
+  /// and an unbounded set of consumer object pointer and the desired
+  /// stockvalue.
   CONSUMER_MAP consumer_map_;
 
   /// This marks the exit of the notifier. This should be taken care of

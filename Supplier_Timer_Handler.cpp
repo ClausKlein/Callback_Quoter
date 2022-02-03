@@ -23,7 +23,7 @@ Supplier_Timer_Handler::Supplier_Timer_Handler (Supplier* supplier, ACE_Reactor*
 
 // Destructor.
 
-Supplier_Timer_Handler::~Supplier_Timer_Handler (void)
+Supplier_Timer_Handler::~Supplier_Timer_Handler ()
 {
   // No-op.
 }
@@ -33,7 +33,8 @@ Supplier_Timer_Handler::~Supplier_Timer_Handler (void)
 int Supplier_Timer_Handler::handle_timeout (const ACE_Time_Value& /* tv */, const void* /* arg */)
 {
 
-  // ACE_DEBUG ((LM_DEBUG, "Sending Stock Market Information to Notifier...\n"));
+  // ACE_DEBUG ((LM_DEBUG, "Sending Stock Market Information to
+  // Notifier...\n"));
 
   // The next current stock rates are obtained from a file.
   if (this->get_stock_information () == -1)
@@ -52,12 +53,13 @@ int Supplier_Timer_Handler::handle_timeout (const ACE_Time_Value& /* tv */, cons
 
 // Get the stock information from a file.
 
-int Supplier_Timer_Handler::get_stock_information (void)
+int Supplier_Timer_Handler::get_stock_information ()
 {
   // Scan the file and obtain the stock information.
   if (fscanf (file_ptr_, "%s %ld\n", stockname_, &value_) != EOF)
   {
-    // ACE_DEBUG ((LM_DEBUG, "Stockname: %s, Stockvalue: %d\n", stockname_, value_));
+    // ACE_DEBUG ((LM_DEBUG, "Stockname: %s, Stockvalue: %d\n", stockname_,
+    // value_));
     return 0;
   }
   else

@@ -12,11 +12,10 @@
 #ifndef SUPPLIER_INPUT_HANDLER_H
 #define SUPPLIER_INPUT_HANDLER_H
 
+#include "Naming_Client.h"
 #include "NotifierS.h"
 #include "Notifier_i.h"
 #include "ace/Event_Handler.h"
-#include "orbsvcs/orbsvcs/Naming/Naming_Client.h"
-#include "orbsvcs/orbsvcs/naming_server/CosNamingS.h"
 // FIXME #include "tao/Utils/ORB_Manager.h"
 
 /**
@@ -68,10 +67,10 @@ private:
   ACE_TCHAR** argv_;
 
   /// Naming context for the naming service.
-  CosNaming::NamingContext_var naming_context_;
+  IDL::traits<CosNaming::NamingContext>::ref_type naming_context_;
 
   /// helper class for getting access to Naming Service.
-  TAO_Naming_Client naming_server_;
+  // XXX TAO_Naming_Client naming_server_;
 
   /// The servant object registered with the orb.
   Notifier_i notifier_i_;
