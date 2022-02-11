@@ -7,7 +7,7 @@ project(*IDL): ridl_ostream_defaults, taox11_anytypecode {
   custom_only = 1
 }
 
-project(Callback_Quoter notifier): taox11_client, taox11_cosnaming_stub, taox11_anytypecode, utils, avoids_corba_e_micro {
+project(Callback_Quoter notifier): taox11_server, taox11_cosnaming_stub, taox11_anytypecode, avoids_corba_e_micro {
   exename = notifier
   after += *IDL
   Source_Files {

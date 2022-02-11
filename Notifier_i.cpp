@@ -32,12 +32,7 @@ void Notifier_i::register_callback (const std::string& stock_name,
 {
   // Store the client information.
   Consumer_Data consumer_data;
-
-  // Necessary to make another copy of the consumer_handler using
-  // <_duplicate> so that we dont lose the consumer object reference
-  // after the method invocation is done.
   consumer_data.consumer_ = std::move (consumer_handler);
-
   consumer_data.desired_value_ = threshold_value;
 
   // The consumer_map consists of the stockname and various consumers
@@ -54,12 +49,12 @@ void Notifier_i::register_callback (const std::string& stock_name,
       throw Callback_Quoter::Invalid_Stock ("Insertion failed! Invalid Stock!\n");
     }
 
-    ; // ACE_DEBUG ((LM_DEBUG, "Inserted map entry: stockname %s threshold %d",
+    ; // TODO ACE_DEBUG ((LM_DEBUG, "Inserted map entry: stockname %s threshold %d",
     // stock_name.c_str(), threshold_value));
   }
   else
   {
-    // TODO the unbounded set entry is created.
+    // a set entry is created.
     CONSUMERS consumers;
 
     // When a new entry is tried to be inserted into the unbounded set and it
@@ -74,11 +69,11 @@ void Notifier_i::register_callback (const std::string& stock_name,
     auto result = this->consumer_map_.insert (std::make_pair (stock_name, consumers));
     if (!result.second)
     {
-      ; // ACE_ERROR ((LM_ERROR, "register_callback: Bind failed!/n"));
+      ; // TODO ACE_ERROR ((LM_ERROR, "register_callback: Bind failed!/n"));
     }
     else
     {
-      ; // ACE_DEBUG ((LM_DEBUG, "new map entry: stockname %s threshold %d\n",
+      ; // TODO ACE_DEBUG ((LM_DEBUG, "new map entry: stockname %s threshold %d\n",
         // stock_name.c_str(), threshold_value));
     }
   }
@@ -114,14 +109,14 @@ void Notifier_i::unregister_callback (taox11::CORBA::object_traits<Callback_Quot
   for (auto& iter : this->consumer_map_)
   {
     // The *iter is nothing but the stockname + unbounded set of
-    // consumers+threshold values, i.e a ACE_Hash_Map_Entry.
+    // consumers+threshold values, i.e a Hash_Map_Entry.
 
     if (iter.second.erase (consumer_to_remove) == 0)
     {
       throw Callback_Quoter::Invalid_Handle ("Unregistration failed! Invalid Consumer Handle!\n");
     }
 
-    // ACE_DEBUG ((LM_DEBUG, "unregister_callback:consumer removed\n"));
+    // TODO ACE_DEBUG ((LM_DEBUG, "unregister_callback:consumer removed\n"));
   }
 }
 
@@ -130,7 +125,7 @@ void Notifier_i::unregister_callback (taox11::CORBA::object_traits<Callback_Quot
 
 void Notifier_i::market_status (const std::string& stock_name, int32_t stock_value)
 {
-  // ACE_DEBUG ((LM_DEBUG, "Notifier_i:: The stockname is %s with price %d\n",
+  // TODO ACE_DEBUG ((LM_DEBUG, "Notifier_i:: The stockname is %s with price %d\n",
   // stock_name, stock_value));
 
   auto consumers = this->consumer_map_.find (stock_name);
@@ -139,7 +134,7 @@ void Notifier_i::market_status (const std::string& stock_name, int32_t stock_val
     // Go through the list of <Consumer_Data> to find which
     // registered client wants to be notified.
 
-    for (const auto& item : consumers->second)
+    for (auto& item : consumers->second)
     {
       // Check whether the stockname is equal before proceeding
       // further.
@@ -147,7 +142,7 @@ void Notifier_i::market_status (const std::string& stock_name, int32_t stock_val
       {
         const Callback_Quoter::Info interested_consumer_data (stock_name, stock_value);
 
-        // ACE_DEBUG ((LM_DEBUG, "pushing information to consumer\n"));
+        // TODO ACE_DEBUG ((LM_DEBUG, "pushing information to consumer\n"));
 
         // The status desired by the consumer is then passed to it.
         item.consumer_->push (interested_consumer_data);
@@ -156,7 +151,7 @@ void Notifier_i::market_status (const std::string& stock_name, int32_t stock_val
   }
   else
   {
-    ; // ACE_DEBUG ((LM_DEBUG, " Stock Not Present!\n"));
+    ; // TODO ACE_DEBUG ((LM_DEBUG, " Stock Not Present!\n"));
   }
 
   // Raising an exception caused problems as they were caught by the Market
@@ -171,7 +166,7 @@ void Notifier_i::shutdown ()
   // before the consumer tries to unregister after the notifier quits.
   notifier_exited_ = 1;
 
-  // ACE_DEBUG ((LM_DEBUG, "The Callback Quoter server is shutting down...\n"));
+  // TODO ACE_DEBUG ((LM_DEBUG, "The Callback Quoter server is shutting down...\n"));
 
   // Instruct the ORB to shutdown.
   this->orb_->shutdown ();
@@ -179,10 +174,12 @@ void Notifier_i::shutdown ()
 
 bool Notifier_i::Consumer_Data::operator== (const Consumer_Data& rhs) const
 {
-  // The <_is_equivalent> function checks if the _var and _ptr objects
-  // are the same.  NOTE: this call might not behave well on other
-  // ORBs since <_is_equivalent> isn't guaranteed to differentiate
-  // object references.
-
+  // NOTE: this call might not behave well on other ORBs
+  // since <_is_equivalent> isn't guaranteed to differentiate object references.
   return this->consumer_->_is_equivalent (rhs.consumer_);
+}
+
+bool Notifier_i::Consumer_Data::operator< (const Consumer_Data& rhs) const
+{
+  return this->desired_value_ < rhs.desired_value_;
 }

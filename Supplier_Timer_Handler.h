@@ -61,7 +61,7 @@ private:
   char stockname_[BUFSIZ];
 
   /// The market value of the stock.It will be typecasted to long later.
-  long value_;
+  int32_t value_;
 };
 
 #endif /* SUPPLIER_TIMER_HANDLER_H */

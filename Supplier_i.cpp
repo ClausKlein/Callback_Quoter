@@ -16,7 +16,6 @@
 #include "ace/OS_NS_unistd.h"
 #include "ace/Reactor.h"
 #include "ace/Read_Buffer.h"
-// XXX #include "tao/debug.h"
 
 // Constructor.
 
@@ -25,7 +24,7 @@ Supplier::Supplier ()
   , use_naming_service_ (1)
   , notifier_ ()
   , f_ptr_ (nullptr)
-  , loop_count_ (10)
+  // UNUSED! , loop_count_ (10)
   , period_value_ (1)
 {
   // No-op.
@@ -39,7 +38,7 @@ Supplier::~Supplier ()
   // Close the stream.
   ACE_OS::fclose (f_ptr_);
 
-  // ACE_DEBUG ((LM_DEBUG, "Market Status Supplier daemon exiting!\n"));
+  // TODO ACE_DEBUG ((LM_DEBUG, "Market Status Supplier daemon exiting!\n"));
 }
 
 // Reads the Server factory IOR from a file.
@@ -80,6 +79,7 @@ int Supplier::parse_args ()
   int result;
 
   while ((c = get_opts ()) != -1)
+  {
     switch (c)
     {
       case 'd': // Debug flag
@@ -129,6 +129,7 @@ int Supplier::parse_args ()
                            this->argv_[0]),
                           -1);
     }
+  }
 
   // Indicates successful parsing of command line.
   return 0;
@@ -136,12 +137,10 @@ int Supplier::parse_args ()
 
 // Give the stock status information to the Notifier.
 
-int Supplier::send_market_status (const char* stock_name, long value)
+int Supplier::send_market_status (const char* stock_name, int32_t value)
 {
-
   try
   {
-
     // Make the RMI.
     this->notifier_->market_status (stock_name, value);
   }
@@ -162,10 +161,9 @@ int Supplier::send_market_status (const char* stock_name, long value)
 
 int Supplier::run ()
 {
-
   long timer_id = 0;
 
-  // ACE_DEBUG ((LM_DEBUG, "Market Status Supplier Daemon is running...\n"));
+  // TODO ACE_DEBUG ((LM_DEBUG, "Market Status Supplier Daemon is running...\n"));
 
   // This sets the period for the stock-feed.
   ACE_Time_Value period (period_value_);
@@ -284,7 +282,7 @@ int Supplier::read_file (ACE_TCHAR* filename)
 {
   f_ptr_ = ACE_OS::fopen (filename, "r");
 
-  // ACE_DEBUG ((LM_DEBUG, "filename = %s\n", filename));
+  // TODO ACE_DEBUG ((LM_DEBUG, "filename = %s\n", filename));
 
   // the stock values are to be read from a file.
   if (f_ptr_ == nullptr)

@@ -48,7 +48,7 @@ public:
   int init (int argc, ACE_TCHAR* argv[]);
 
   /// Sends the stock name and its value.
-  int send_market_status (const char* stock_name, long value);
+  int send_market_status (const char* stock_name, int32_t value);
 
   /// The timer handler used to send the market status to the notifier
   /// periodically.
@@ -98,7 +98,7 @@ private:
   FILE* f_ptr_;
 
   /// Iteration count.
-  int loop_count_;
+  // UNUSED! int loop_count_;
 
   /// Time period between two succesive market feeds to the Notifier.
   long period_value_;

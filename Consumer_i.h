@@ -34,7 +34,7 @@ public:
   ~Consumer_i ();
 
   /// Gets the stock information from the Notifier.
-  void push (const Callback_Quoter::Info& data);
+  void push (const Callback_Quoter::Info& data) const override;
 
   /// Used to get the consumer to shut down.
   void shutdown () override;

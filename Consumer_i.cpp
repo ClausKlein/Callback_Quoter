@@ -12,18 +12,18 @@
 
 #include "Consumer_i.h"
 
-Consumer_i::Consumer_i ()
+Consumer_i::Consumer_i (): quit_(0)
 {}
 
 Consumer_i::~Consumer_i ()
 {}
 
-void Consumer_i::push (const Callback_Quoter::Info& data)
+void Consumer_i::push (const Callback_Quoter::Info& data) const
 {
   // On getting the needed information you now proceed to the next
   // step, which could be obtaining the shares.
 
-  // ACE_DEBUG ((LM_DEBUG, "Selling 10,000 %s shares at %d!!\n",
+  // TODO ACE_DEBUG ((LM_DEBUG, "Selling 10,000 %s shares at %d!!\n",
   // data.stock_name, data.value));
 }
 
@@ -32,9 +32,10 @@ void Consumer_i::shutdown ()
 
   // Instruct the ORB to shutdown.
 
-  // ACE_DEBUG ((LM_DEBUG, " consumer shutting down \n"));
+  // TODO ACE_DEBUG ((LM_DEBUG, " consumer shutting down \n"));
 
   this->orb_->shutdown ();
+  quit_ = 1;
 }
 
 void Consumer_i::orb (IDL::traits<CORBA::ORB>::ref_type o)
