@@ -19,7 +19,7 @@
 
 // Constructor.
 
-Notifier_Input_Handler::Notifier_Input_Handler (void)
+Notifier_Input_Handler::Notifier_Input_Handler ()
   : ior_output_file_ (0)
   , argc_ (0)
   , argv_ (0)
@@ -28,7 +28,7 @@ Notifier_Input_Handler::Notifier_Input_Handler (void)
 
 // Destructor.
 
-Notifier_Input_Handler::~Notifier_Input_Handler (void)
+Notifier_Input_Handler::~Notifier_Input_Handler ()
 {
   // Make sure to cleanup the STDIN handler.
 
@@ -42,7 +42,7 @@ Notifier_Input_Handler::~Notifier_Input_Handler (void)
 // The naming service is initialized and the naming context as well as
 // the object name is bound to the naming server.
 
-int Notifier_Input_Handler::init_naming_service (void)
+int Notifier_Input_Handler::init_naming_service ()
 {
 
 // FIMXE: TODO
@@ -79,12 +79,13 @@ int Notifier_Input_Handler::init_naming_service (void)
 }
 
 // Parse the command-line arguments and set options.
-int Notifier_Input_Handler::parse_args (void)
+int Notifier_Input_Handler::parse_args ()
 {
   ACE_Get_Opt get_opts (this->argc_, this->argv_, ACE_TEXT ("df:s "));
   int c;
 
   while ((c = get_opts ()) != -1)
+  {
     switch (c)
     {
       case 'd': // debug flag.
@@ -114,6 +115,7 @@ int Notifier_Input_Handler::parse_args (void)
                            argv_[0]),
                           1);
     }
+  }
 
   // Indicates successful parsing of command line.
   return 0;
@@ -173,7 +175,7 @@ int Notifier_Input_Handler::init (int argc, ACE_TCHAR* argv[])
   return 0;
 }
 
-int Notifier_Input_Handler::run (void)
+int Notifier_Input_Handler::run ()
 {
   // Run the main event loop for the ORB.
 

@@ -76,6 +76,7 @@ private:
   public:
     /// Comparison operator.
     bool operator== (const Consumer_Data& rhs) const;
+    bool operator< (const Consumer_Data& rhs) const;
 
     /// Stores the consumer object reference.
     IDL::traits<Callback_Quoter::Consumer>::ref_type consumer_;

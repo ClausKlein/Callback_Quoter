@@ -82,6 +82,7 @@ int Consumer_Handler::parse_args ()
   int result;
 
   while ((c = get_opts ()) != -1)
+  {
     switch (c)
     {
       case 'd': // debug flag
@@ -132,6 +133,7 @@ int Consumer_Handler::parse_args ()
                            this->argv_[0]),
                           -1);
     }
+  }
 
   // Indicates successful parsing of command line.
   return 0;

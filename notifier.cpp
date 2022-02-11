@@ -23,12 +23,12 @@ int ACE_TMAIN (int argc, ACE_TCHAR* argv[])
   }
   catch (const CORBA::SystemException& sysex)
   {
-    sysex._tao_print_exception ("System Exception");
+    // TODO sysex._tao_print_exception ("System Exception");
     return -1;
   }
   catch (const CORBA::UserException& userex)
   {
-    userex._tao_print_exception ("User Exception");
+    // TODO userex._tao_print_exception ("User Exception");
     return -1;
   }
 

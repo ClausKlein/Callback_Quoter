@@ -12,13 +12,13 @@
 
 #include "Notifier_i.h"
 
-Notifier_i::Notifier_i (void)
+Notifier_i::Notifier_i ()
   : notifier_exited_ (0)
 {
   // No-op
 }
 
-Notifier_i::~Notifier_i (void)
+Notifier_i::~Notifier_i ()
 {
   // No-op
 }
@@ -49,7 +49,7 @@ void Notifier_i::register_callback (const std::string& stock_name,
   auto consumers = this->consumer_map_.find (stock_name);
   if (consumers != this->consumer_map_.end ())
   { // found a set entry at the map
-    if (consumers->second.insert (consumer_data).second == false)
+    if (!consumers->second.insert (consumer_data).second)
     {
       throw Callback_Quoter::Invalid_Stock ("Insertion failed! Invalid Stock!\n");
     }
@@ -64,7 +64,7 @@ void Notifier_i::register_callback (const std::string& stock_name,
 
     // When a new entry is tried to be inserted into the unbounded set and it
     // fails an exception is raised.
-    if (consumers.insert (consumer_data).second == false)
+    if (!consumers.insert (consumer_data).second)
     {
       throw Callback_Quoter::Invalid_Stock ("Insertion failed! Invalid Stock!\n");
     }
@@ -108,22 +108,15 @@ void Notifier_i::unregister_callback (taox11::CORBA::object_traits<Callback_Quot
     return;
   }
 
-  for (auto iter = this->consumer_map_.begin (); iter != this->consumer_map_.end (); ++iter)
+  Consumer_Data consumer_to_remove;
+  consumer_to_remove.consumer_ = std::move (consumer);
+
+  for (auto& iter : this->consumer_map_)
   {
     // The *iter is nothing but the stockname + unbounded set of
     // consumers+threshold values, i.e a ACE_Hash_Map_Entry.
 
-    Consumer_Data consumer_to_remove;
-
-    consumer_to_remove.consumer_ = std::move (consumer);
-
-    // int_id is a member of the ACE_Hash_Map_Entry.  The remove
-    // method will do a find internally using operator == which
-    // will check only the consumer pointers.  If match found it
-    // will be removed from the set. If the consumer cannot be
-    // removed an exception is raised.
-
-    if (iter->second.erase (consumer_to_remove) == 0)
+    if (iter.second.erase (consumer_to_remove) == 0)
     {
       throw Callback_Quoter::Invalid_Handle ("Unregistration failed! Invalid Consumer Handle!\n");
     }
@@ -170,7 +163,7 @@ void Notifier_i::market_status (const std::string& stock_name, int32_t stock_val
   // daemon who exited prematurely.
 }
 
-void Notifier_i::shutdown (void)
+void Notifier_i::shutdown ()
 {
   this->consumer_map_.clear ();
 
