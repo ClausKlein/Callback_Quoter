@@ -40,43 +40,47 @@ void Notifier_i::register_callback (const std::string& stock_name,
 
   consumer_data.desired_value_ = threshold_value;
 
-  CONSUMERS* consumers = 0;
-
   // The consumer_map consists of the stockname and various consumers
   // with their threshold values. To register a consumer into this
   // map, first the stockname is matched with an existing one (if any)
   // and the consumer and the threshold value is attached. Else, a new
   // entry is created for the stockname.
 
-  if (this->consumer_map_.find (stock_name.c_str (), consumers) == 0)
-  {
-    if (consumers->insert (consumer_data) == -1)
+  auto consumers = this->consumer_map_.find (stock_name);
+  if (consumers != this->consumer_map_.end ())
+  { // found a set entry at the map
+    if (consumers->second.insert (consumer_data).second == false)
     {
       throw Callback_Quoter::Invalid_Stock ("Insertion failed! Invalid Stock!\n");
     }
-    else
-    // ACE_DEBUG ((LM_DEBUG, "Inserted map entry: stockname %s threshold %d",
+
+    ; // ACE_DEBUG ((LM_DEBUG, "Inserted map entry: stockname %s threshold %d",
     // stock_name.c_str(), threshold_value));
   }
   else
   {
-    // the unbounded set entry is created.
-    ACE_NEW_THROW_EX (consumers, CONSUMERS, CORBA::NO_MEMORY ());
+    // TODO the unbounded set entry is created.
+    CONSUMERS consumers;
 
     // When a new entry is tried to be inserted into the unbounded set and it
     // fails an exception is raised.
-    if (consumers->insert (consumer_data) == -1)
+    if (consumers.insert (consumer_data).second == false)
     {
       throw Callback_Quoter::Invalid_Stock ("Insertion failed! Invalid Stock!\n");
     }
 
     // The bond between the stockname <hash_key> and the consumers <hash_value>
     // is fused.
-    if (this->consumer_map_.bind (stock_name.c_str (), consumers) == -1)
+    auto result = this->consumer_map_.insert (std::make_pair (stock_name, consumers));
+    if (!result.second)
+    {
       ; // ACE_ERROR ((LM_ERROR, "register_callback: Bind failed!/n"));
+    }
     else
+    {
       ; // ACE_DEBUG ((LM_DEBUG, "new map entry: stockname %s threshold %d\n",
         // stock_name.c_str(), threshold_value));
+    }
   }
 }
 
@@ -104,7 +108,7 @@ void Notifier_i::unregister_callback (taox11::CORBA::object_traits<Callback_Quot
     return;
   }
 
-  for (CONSUMER_MAP::ITERATOR iter = this->consumer_map_.begin (); iter != this->consumer_map_.end (); ++iter)
+  for (auto iter = this->consumer_map_.begin (); iter != this->consumer_map_.end (); ++iter)
   {
     // The *iter is nothing but the stockname + unbounded set of
     // consumers+threshold values, i.e a ACE_Hash_Map_Entry.
@@ -119,11 +123,11 @@ void Notifier_i::unregister_callback (taox11::CORBA::object_traits<Callback_Quot
     // will be removed from the set. If the consumer cannot be
     // removed an exception is raised.
 
-    if ((*iter).int_id_->remove (consumer_to_remove) == -1)
+    if (iter->second.erase (consumer_to_remove) == 0)
     {
       throw Callback_Quoter::Invalid_Handle ("Unregistration failed! Invalid Consumer Handle!\n");
     }
-    else
+
     // ACE_DEBUG ((LM_DEBUG, "unregister_callback:consumer removed\n"));
   }
 }
@@ -136,48 +140,43 @@ void Notifier_i::market_status (const std::string& stock_name, int32_t stock_val
   // ACE_DEBUG ((LM_DEBUG, "Notifier_i:: The stockname is %s with price %d\n",
   // stock_name, stock_value));
 
-  CONSUMERS* consumers = 0;
-
-  if (this->consumer_map_.find (stock_name.c_str (), consumers) == 0)
+  auto consumers = this->consumer_map_.find (stock_name);
+  if (consumers != this->consumer_map_.end ())
   {
     // Go through the list of <Consumer_Data> to find which
     // registered client wants to be notified.
 
-    for (CONSUMERS::ITERATOR iter = consumers->begin (); iter != consumers->end (); ++iter)
+    for (const auto& item : consumers->second)
     {
       // Check whether the stockname is equal before proceeding
       // further.
-      if (stock_value >= (*iter).desired_value_)
+      if (stock_value >= item.desired_value_)
       {
-        Callback_Quoter::Info interested_consumer_data (stock_name, stock_value);
-
-        // XXX interested_consumer_data.stock_name = stock_name;
-        // XXX interested_consumer_data.value = stock_value;
+        const Callback_Quoter::Info interested_consumer_data (stock_name, stock_value);
 
         // ACE_DEBUG ((LM_DEBUG, "pushing information to consumer\n"));
 
-        // The status desired by the consumer is then passed to
-        // it.
-        (*iter).consumer_->push (interested_consumer_data);
+        // The status desired by the consumer is then passed to it.
+        item.consumer_->push (interested_consumer_data);
       }
     }
   }
   else
-  // ACE_DEBUG ((LM_DEBUG, " Stock Not Present!\n"));
+  {
+    ; // ACE_DEBUG ((LM_DEBUG, " Stock Not Present!\n"));
+  }
+
   // Raising an exception caused problems as they were caught by the Market
   // daemon who exited prematurely.
 }
 
 void Notifier_i::shutdown (void)
 {
-  if (this->consumer_map_.close () > 0)
-    ; // ACE_ERROR ((LM_ERROR, "Consumer_map_close error!\n"));
-  else
+  this->consumer_map_.clear ();
+
   // This marks the exit of the notifier. This should be taken care of
   // before the consumer tries to unregister after the notifier quits.
-  {
-    notifier_exited_ = 1;
-  }
+  notifier_exited_ = 1;
 
   // ACE_DEBUG ((LM_DEBUG, "The Callback Quoter server is shutting down...\n"));
 

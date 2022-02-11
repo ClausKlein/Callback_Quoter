@@ -273,7 +273,7 @@ int Consumer_Handler::run ()
     {
 
       // Register with the server.
-      this->server_->register_callback (this->stock_name_.c_str (), this->threshold_value_, this->consumer_var_);
+      this->server_->register_callback (this->stock_name_, this->threshold_value_, this->consumer_var_);
 
       // Note the registration.
       this->registered_ = 1;

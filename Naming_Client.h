@@ -1,6 +1,18 @@
+#ifndef NAMING_CLIENT_H
+#define NAMING_CLIENT_H
+
+#if !defined(ACE_LACKS_PRAGMA_ONCE)
+#  pragma once
+#endif /* ACE_LACKS_PRAGMA_ONCE */
+
 #include "orbsvcs/orbsvcs/naming_server/CosNamingC.h"
 
 #include "tao/x11/log.h"
+
+namespace
+{
+
+//----------------------------------------------------------------
 
 template <class T>
 typename IDL::traits<T>::ref_type resolve_init (IDL::traits<CORBA::ORB>::ref_type orb, const std::string& id)
@@ -85,3 +97,6 @@ typename IDL::traits<T>::ref_type resolve_name (IDL::traits<CosNaming::NamingCon
 }
 
 //----------------------------------------------------------------
+
+} // namespace
+#endif // NAMING_CLIENT_H

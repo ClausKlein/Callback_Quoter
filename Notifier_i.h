@@ -20,10 +20,9 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 #include "ConsumerC.h"
-#include "ace/Containers.h"
-#include "ace/Hash_Map_Manager.h"
-#include "ace/Null_Mutex.h"
-#include "ace/SString.h"
+
+#include <set>
+#include <unordered_map>
 
 /**
  * @class Notifier_i
@@ -63,8 +62,7 @@ public:
   // CONSUMER_MAP* get_consumer_map_ptr ();
   // Returns the consumer map ptr.
 
-  // private:
-public:
+private:
   /// The ORB manager.
   IDL::traits<CORBA::ORB>::ref_type orb_;
 
@@ -86,9 +84,9 @@ public:
     int32_t desired_value_;
   };
 
-  typedef ACE_Unbounded_Set<Consumer_Data> CONSUMERS;
+  typedef std::set<Consumer_Data> CONSUMERS;
 
-  typedef ACE_Hash_Map_Manager<ACE_CString, CONSUMERS, ACE_Null_Mutex> CONSUMER_MAP;
+  typedef std::unordered_map<std::string, CONSUMERS> CONSUMER_MAP;
 
   /// This is the hash map with each hash_entry consisting of the stockname
   /// and an unbounded set of consumer object pointer and the desired
