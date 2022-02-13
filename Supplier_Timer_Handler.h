@@ -39,7 +39,7 @@ public:
   Supplier_Timer_Handler (Supplier* supplier, ACE_Reactor* reactor, FILE* file_ptr);
 
   /// Destructor.
-  ~Supplier_Timer_Handler ();
+  ~Supplier_Timer_Handler () = default;
 
   /// Method which will be called by the Reactor when timeout occurs.
   int handle_timeout (const ACE_Time_Value& tv, const void* arg = 0) override;

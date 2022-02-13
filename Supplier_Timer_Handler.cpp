@@ -6,13 +6,11 @@
  */
 //=============================================================================
 
-#include "ace/ACE.h"
-
 #include "Supplier_Timer_Handler.h"
 
-// The supplier refernce is got so that the mathods in the supplier
-// can be accessed.
+#include "ace/ACE.h"
 
+// The supplier refernce is got so that the mathods in the supplier can be accessed.
 Supplier_Timer_Handler::Supplier_Timer_Handler (Supplier* supplier, ACE_Reactor* reactor, FILE* file_ptr)
   : supplier_obj_ (supplier)
   , reactor_ (reactor)
@@ -21,20 +19,10 @@ Supplier_Timer_Handler::Supplier_Timer_Handler (Supplier* supplier, ACE_Reactor*
   // No-op.
 }
 
-// Destructor.
-
-Supplier_Timer_Handler::~Supplier_Timer_Handler ()
-{
-  // No-op.
-}
-
 // Method which will be called by the reactor on timeout.
-
 int Supplier_Timer_Handler::handle_timeout (const ACE_Time_Value& /* tv */, const void* /* arg */)
 {
-
-  // TODO ACE_DEBUG ((LM_DEBUG, "Sending Stock Market Information to
-  // Notifier...\n"));
+  taox11_debug << "Sending Stock Market Information to Notifier...n" << std::endl;
 
   // The next current stock rates are obtained from a file.
   if (this->get_stock_information () == -1)
@@ -42,8 +30,7 @@ int Supplier_Timer_Handler::handle_timeout (const ACE_Time_Value& /* tv */, cons
     return 0;
   }
 
-  // Send the stock information to the notifier.  Graceful exit when
-  // the notifier doesnt accept the information.
+  // Send the stock information to the notifier.  Graceful exit when the notifier doesnt accept the information.
   if (this->supplier_obj_->send_market_status (stockname_, value_) < 0)
   {
     this->reactor_->end_event_loop ();
@@ -54,20 +41,16 @@ int Supplier_Timer_Handler::handle_timeout (const ACE_Time_Value& /* tv */, cons
 }
 
 // Get the stock information from a file.
-
 int Supplier_Timer_Handler::get_stock_information ()
 {
   // Scan the file and obtain the stock information.
   if (fscanf (file_ptr_, "%s %d\n", stockname_, &value_) != EOF)
   {
-    // TODO ACE_DEBUG ((LM_DEBUG, "Stockname: %s, Stockvalue: %d\n", stockname_,
-    // value_));
+    taox11_debug << "Stockname: " << stockname_ << ", Stockvalue: " << value_ << std::endl;
     return 0;
   }
-  else
-  {
-    // Close down the Reactor.
-    this->reactor_->end_event_loop ();
-    return -1;
-  }
+
+  // Close down the Reactor.
+  this->reactor_->end_event_loop ();
+  return -1;
 }

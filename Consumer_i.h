@@ -31,7 +31,7 @@ public:
   Consumer_i ();
 
   /// Destructor.
-  ~Consumer_i ();
+  ~Consumer_i () = default;
 
   /// Gets the stock information from the Notifier.
   void push (const Callback_Quoter::Info& data) const override;

@@ -1,19 +1,19 @@
 #include "Supplier_i.h"
 
+#include "tao/x11/log.h"
+
 // This function runs the Callback Quoter Supplier daemon.
 
 int ACE_TMAIN (int argc, ACE_TCHAR* argv[])
 {
   Supplier supplier;
 
-  // ACE_DEBUG ((LM_DEBUG, "\n\tMarket Status Supplier Daemon\n\n"));
+  taox11_debug << "\n\tMarket Status Supplier Daemon\n\n" << std::endl;
 
   if (supplier.init (argc, argv) == -1)
   {
     return -1;
   }
-  else
-  {
-    return supplier.run ();
-  }
+
+  return supplier.run ();
 }

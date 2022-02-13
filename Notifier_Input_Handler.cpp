@@ -10,12 +10,12 @@
 //=============================================================================
 
 #include "Notifier_Input_Handler.h"
+
 #include "ace/Get_Opt.h"
 #include "ace/OS_NS_ctype.h"
 #include "ace/OS_NS_unistd.h"
-#include "tao/x11/orb.h"
-// XXX #include "tao/ORB_Core.h"
-//#include "tao/debug.h"
+
+#include "tao/x11/log.h"
 
 // Constructor.
 
@@ -30,13 +30,17 @@ Notifier_Input_Handler::Notifier_Input_Handler ()
 
 Notifier_Input_Handler::~Notifier_Input_Handler ()
 {
-  // Make sure to cleanup the STDIN handler.
+  // FIXME: Make sure to cleanup the STDIN handler.
 
 #if 0
     if (ACE_Event_Handler::remove_stdin_handler (this->notifier_i_.orb_->orb_core ()->reactor (),
             this->notifier_i_.orb_->orb_core ()->thr_mgr ()) == -1)
-        //ACE_ERROR ((LM_ERROR, "%p\n", "remove_stdin_handler"));
+    {
+        ACE_ERROR ((LM_ERROR, "%p\n", "remove_stdin_handler"));
+    }
 #endif
+
+  taox11_error << "remove_stdin_handler failed" << std::endl;
 }
 
 // The naming service is initialized and the naming context as well as
@@ -125,14 +129,12 @@ int Notifier_Input_Handler::parse_args ()
 
 int Notifier_Input_Handler::init (int argc, ACE_TCHAR* argv[])
 {
-
-  // Call the init of <TAO_ORB_Manager> to initialize the ORB and
-  // create the child poa under the root POA.
+  // Call the init of <TAO_ORB_Manager> to initialize the ORB and create the child poa under the root POA.
 
   this->argc_ = argc;
   this->argv_ = argv;
 
-  // FIXME if (this->orb_manager_.init_child_poa (this->argc_, this->argv_,
+  // FIXME: if (this->orb_manager_.init_child_poa (this->argc_, this->argv_,
   // "child_poa") == -1) ACE_ERROR_RETURN ((LM_ERROR, "%p\n", "init_child_poa"),
   // -1);
 
@@ -146,9 +148,9 @@ int Notifier_Input_Handler::init (int argc, ACE_TCHAR* argv[])
   // Register our <Input_Handler> to handle STDIN events, which will
   // trigger the <handle_input> method to process these events.
 
-  IDL::traits<CORBA::ORB>::ref_type orb; // FIXME = this->orb_manager_.orb ();
+  IDL::traits<CORBA::ORB>::ref_type orb; // FIXME: = this->orb_manager_.orb ();
 
-  // FIXME if (ACE_Event_Handler::register_stdin_handler (this, orb->orb_core
+  // FIXME: if (ACE_Event_Handler::register_stdin_handler (this, orb->orb_core
   // ()->reactor (), orb->orb_core ()->thr_mgr ()) == -1) ACE_ERROR_RETURN
   // ((LM_ERROR, "%p\n", "register_stdin_handler"), -1);
 
@@ -156,11 +158,11 @@ int Notifier_Input_Handler::init (int argc, ACE_TCHAR* argv[])
   this->notifier_i_.orb (orb);
 
   // Activate the servant in the POA.
-  // FIXME auto str = this->orb_manager_.activate_under_child_poa ("Notifier",
+  // FIXME: auto str = this->orb_manager_.activate_under_child_poa ("Notifier",
   // &this->notifier_i_);
   std::string str;
 
-  // ACE_DEBUG ((LM_DEBUG, "The IOR is: <%s>\n", str));
+  taox11_debug << "The IOR is: " << str << std::endl;
 
   if (this->ior_output_file_)
   {
@@ -179,9 +181,9 @@ int Notifier_Input_Handler::run ()
 {
   // Run the main event loop for the ORB.
 
-  // ACE_DEBUG ((LM_DEBUG, " Type \"q\" to quit \n"));
+  taox11_debug << " Type \"q\" to quit" << std::endl;
 
-  // FIXME int result = this->orb_manager_.run ();
+  // FIXME: int result = this->orb_manager_.run ();
   int result = -1;
 
   if (result == -1)
@@ -208,18 +210,18 @@ int Notifier_Input_Handler::handle_input (ACE_HANDLE)
       buf[strlen - 1] = '\0';
     }
 
-    // ACE_DEBUG ((LM_DEBUG, "%s", buf));
+    taox11_debug << buf << std::endl;
 
     if (ACE_OS::ace_tolower (buf[0]) == 'q')
     {
       // @@ Please remove this call if it's not used.
-      // (this->notifier_i_.consumer_map_).close();
+      // FIXME: (this->notifier_i_.consumer_map_).close();
       this->notifier_i_.shutdown ();
     }
   }
   catch (const CORBA::Exception& ex)
   {
-    // TODO ex._tao_print_exception ("Input_Handler::init");
+    taox11_error << "Exception in Notifier_Input_Handler::handle_input(): " << ex << std::endl;
     return -1;
   }
 

@@ -47,7 +47,7 @@ public:
 protected:
   /// Protected destructor so that the signal handler is always created
   /// dynamically and hence the heap doesnt get corrupted.
-  ~Consumer_Signal_Handler ();
+  ~Consumer_Signal_Handler () = default;
 
 private:
   /// Exit gracefully on a signal.

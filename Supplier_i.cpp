@@ -38,11 +38,10 @@ Supplier::~Supplier ()
   // Close the stream.
   ACE_OS::fclose (f_ptr_);
 
-  // TODO ACE_DEBUG ((LM_DEBUG, "Market Status Supplier daemon exiting!\n"));
+  taox11_debug << "Market Status Supplier Daemon exiting!" << std::endl;
 }
 
 // Reads the Server factory IOR from a file.
-
 int Supplier::read_ior (ACE_TCHAR* filename)
 {
   // Open the file for reading.
@@ -70,7 +69,6 @@ int Supplier::read_ior (ACE_TCHAR* filename)
 }
 
 // Parses the command line arguments and returns an error status.
-
 int Supplier::parse_args ()
 {
   ACE_Get_Opt get_opts (argc_, argv_, ACE_TEXT ("dn:f:i:xk:xs"));
@@ -136,7 +134,6 @@ int Supplier::parse_args ()
 }
 
 // Give the stock status information to the Notifier.
-
 int Supplier::send_market_status (const char* stock_name, int32_t value)
 {
   try
@@ -146,24 +143,23 @@ int Supplier::send_market_status (const char* stock_name, int32_t value)
   }
   catch (const CORBA::SystemException& sysex)
   {
-    // TODO sysex._tao_print_exception ("System Exception : Supplier::send_market_status");
+    taox11_error << "System Exception : Supplier::send_market_status(): " << sysex << std::endl;
     return -1;
   }
   catch (const CORBA::UserException& userex)
   {
-    // TODO userex._tao_print_exception ("User Exception : Supplier::send_market_status");
+    taox11_error << "User Exception : Supplier::send_market_status(): " << userex << std::endl;
     return -1;
   }
   return 0;
 }
 
 // Execute client example code.
-
 int Supplier::run ()
 {
   long timer_id = 0;
 
-  // TODO ACE_DEBUG ((LM_DEBUG, "Market Status Supplier Daemon is running...\n"));
+  taox11_debug << "Market Status Supplier Daemon is running..." << std::endl;
 
   // This sets the period for the stock-feed.
   ACE_Time_Value period (period_value_);
@@ -181,7 +177,8 @@ int Supplier::run ()
 
 int Supplier::via_naming_service ()
 {
-// TODO: refactory! CK
+  // TODO: refactory! CK
+
 #if 0
     try
     {
@@ -197,7 +194,7 @@ int Supplier::via_naming_service ()
 
         IDL::traits<CORBA::Object>::ref_type notifier_obj = this->naming_services_client_->resolve (notifier_ref_name);
 
-        // The CORBA::Object_var object is downcast to Notifier_var
+        // The CORBA::Object object is downcast to Notifier
         // using the <_narrow> method.
         this->notifier_ = Notifier::_narrow (notifier_obj);
     }
@@ -210,7 +207,7 @@ int Supplier::via_naming_service ()
 #endif
 
   {
-    // TODO userex._tao_print_exception ("User Exception : Supplier::via_naming_service\n");
+    taox11_error << "Exception : Supplier::via_naming_service()" << std::endl;
     return -1;
   }
 
@@ -218,7 +215,6 @@ int Supplier::via_naming_service ()
 }
 
 // Init function.
-
 int Supplier::init (int argc, ACE_TCHAR** argv)
 {
   this->argc_ = argc;
@@ -253,18 +249,18 @@ int Supplier::init (int argc, ACE_TCHAR** argv)
     {
       ACE_ERROR_RETURN ((LM_ERROR, "invalid ior <%s>\n", this->ior_), -1);
     }
-    // The downcasting from CORBA::Object_var to Notifier_var is
-    // done using the <_narrow> method.
+
+    // The downcasting from CORBA::Object to Notifier is done using the <narrow> method.
     this->notifier_ = IDL::traits<Notifier>::narrow (notifier_object);
   }
   catch (const CORBA::SystemException& sysex)
   {
-    // TODO sysex._tao_print_exception ("System Exception : Supplier::init");
+    taox11_error << "System Exception : Supplier::init(): " << sysex << std::endl;
     return -1;
   }
   catch (const CORBA::UserException& userex)
   {
-    // TODO userex._tao_print_exception ("User Exception : Supplier::init");
+    taox11_error << "User Exception : Supplier::init(): " << userex << std::endl;
     return -1;
   }
 
@@ -277,12 +273,11 @@ ACE_Reactor* Supplier::reactor_used () const
 }
 
 // The stock market information is read from a file.
-
 int Supplier::read_file (ACE_TCHAR* filename)
 {
   f_ptr_ = ACE_OS::fopen (filename, "r");
 
-  // TODO ACE_DEBUG ((LM_DEBUG, "filename = %s\n", filename));
+  taox11_debug << "filename = " << filename << std::endl;
 
   // the stock values are to be read from a file.
   if (f_ptr_ == nullptr)

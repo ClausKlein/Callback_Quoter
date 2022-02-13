@@ -11,9 +11,7 @@
 
 #include "Consumer_Handler.h"
 
-// XXX #include "tao/ORB.h"
-// XXX #include "tao/ORB_Core.h"
-// XXX #include "tao/debug.h"
+#include "tao/x11/log.h"
 
 #include "ace/Event_Handler.h"
 #include "ace/Get_Opt.h"
@@ -35,13 +33,19 @@ Consumer_Handler::Consumer_Handler ()
 
 Consumer_Handler::~Consumer_Handler ()
 {
-  // Make sure to cleanup the STDIN handler.
+  // FIXME: Make sure to cleanup the STDIN handler.
 
   if (this->interactive_ == 1)
   {
-    // FIXME if (ACE_Event_Handler::remove_stdin_handler (this->orb_->orb_core ()->reactor (), this->orb_->orb_core
-    // ()->thr_mgr ()) == -1)
-    // ACE_ERROR ((LM_ERROR, "%p\n", "remove_stdin_handler"));
+
+#if 0
+    if (ACE_Event_Handler::remove_stdin_handler (this->orb_->orb_core ()->reactor (), this->orb_->orb_core ()->thr_mgr ()) == -1)
+    {
+       ACE_ERROR ((LM_ERROR, "%p\n", "remove_stdin_handler"));
+    }
+#endif
+
+    taox11_error << "remove_stdin_handler failed" << std::endl;
   }
 }
 
@@ -167,7 +171,7 @@ int Consumer_Handler::via_naming_service ()
 #endif
 
   {
-    // TODO ex._tao_print_exception ("Consumer_Handler::via_naming_service\n");
+    taox11_error << "Exception in Consumer_Handler::via_naming_service(): " << std::endl;
     return -1;
   }
 
@@ -177,12 +181,11 @@ int Consumer_Handler::via_naming_service ()
 // Init function.
 int Consumer_Handler::init (int argc, ACE_TCHAR** argv)
 {
-
   this->argc_ = argc;
   this->argv_ = argv;
 
-  // Register our <Input_Handler> to handle STDIN events, which will
-  // trigger the <handle_input> method to process these events.
+  // Register our <Input_Handler> to handle STDIN events, which will trigger the <handle_input> method to process these
+  // events.
 
   try
   {
@@ -197,22 +200,26 @@ int Consumer_Handler::init (int argc, ACE_TCHAR** argv)
 
     if (this->interactive_ == 1)
     {
-      // ACE_DEBUG ((LM_DEBUG, " Services provided:\n" " * Registration <type
-      // 'r'>\n" " * Unregistration <type 'u'>\n" " * Quit <type 'q'>\n"));
+      taox11_debug << "Services provided:\n * Registration <type 'r'>\n * Unregistration <type 'u'>\n * Quit <type 'q'>\n"
+                   << std::endl;
 
       ACE_NEW_RETURN (consumer_input_handler_, Consumer_Input_Handler (this), -1);
 
-      // FIXME if (ACE_Event_Handler::register_stdin_handler (consumer_input_handler_, this->orb_->orb_core ()->reactor (),
-      // this->orb_->orb_core ()->thr_mgr ()) == -1)
-      ACE_ERROR_RETURN ((LM_ERROR, "%p\n", "register_stdin_handler"), -1);
+      // FIXME: if (ACE_Event_Handler::register_stdin_handler (consumer_input_handler_, this->orb_->orb_core ()->reactor
+      // (), this->orb_->orb_core ()->thr_mgr ()) == -1)
+      {
+        // ACE_ERROR_RETURN ((LM_ERROR, "%p\n", "register_stdin_handler"), -1);
+      }
 
       // Register the signal event handler for ^C
       ACE_NEW_RETURN (consumer_signal_handler_, Consumer_Signal_Handler (this), -1);
 
+#if 0
       if (this->reactor_used ()->register_handler (SIGINT, consumer_signal_handler_) == -1)
       {
         ACE_ERROR_RETURN ((LM_ERROR, "%p\n", "register_handler for SIGINT"), -1);
       }
+#endif
     }
     // use the naming service.
     if (this->use_naming_service_)
@@ -243,7 +250,7 @@ int Consumer_Handler::init (int argc, ACE_TCHAR** argv)
   }
   catch (const CORBA::Exception& ex)
   {
-    // TODO ex._tao_print_exception ("Consumer_Handler::init");
+    taox11_error << "Exception in Consumer_Handler::init(): " << ex << std::endl;
     return -1;
   }
 
@@ -252,7 +259,6 @@ int Consumer_Handler::init (int argc, ACE_TCHAR** argv)
 
 int Consumer_Handler::run ()
 {
-
   try
   {
     // Obtain and activate the RootPOA.
@@ -273,7 +279,6 @@ int Consumer_Handler::run ()
 
     if (this->interactive_ == 0)
     {
-
       // Register with the server.
       this->server_->register_callback (this->stock_name_, this->threshold_value_, this->consumer_var_);
 
@@ -281,7 +286,7 @@ int Consumer_Handler::run ()
       this->registered_ = 1;
       this->unregistered_ = 0;
 
-      // ACE_DEBUG ((LM_DEBUG, "registeration done!\n"));
+      taox11_debug << "registeration done!" << std::endl;
     }
 
     // Run the ORB.
@@ -289,7 +294,7 @@ int Consumer_Handler::run ()
   }
   catch (const CORBA::Exception& ex)
   {
-    // TODO ex._tao_print_exception ("Consumer_Handler::init");
+    taox11_error << "Exception in Consumer_Handler::run(): " << ex << std::endl;
     return -1;
   }
 
@@ -298,6 +303,6 @@ int Consumer_Handler::run ()
 
 ACE_Reactor* Consumer_Handler::reactor_used () const
 {
-  // FIXME return this->orb_->orb_core ()->reactor ();
+  // FIXME: return this->orb_->orb_core ()->reactor ();
   return nullptr;
 }

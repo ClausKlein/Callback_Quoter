@@ -12,20 +12,15 @@
 
 #include "Notifier_i.h"
 
+#include "tao/x11/log.h"
+
 Notifier_i::Notifier_i ()
   : notifier_exited_ (0)
 {
   // No-op
 }
 
-Notifier_i::~Notifier_i ()
-{
-  // No-op
-}
-
-// Register a distributed callback handler that is invoked when the
-// given stock reaches the desired threshold value.
-
+// Register a distributed callback handler that is invoked when the given stock reaches the desired threshold value.
 void Notifier_i::register_callback (const std::string& stock_name,
                                     int32_t threshold_value,
                                     taox11::CORBA::object_traits<Callback_Quoter::Consumer>::ref_type consumer_handler)
@@ -35,11 +30,9 @@ void Notifier_i::register_callback (const std::string& stock_name,
   consumer_data.consumer_ = std::move (consumer_handler);
   consumer_data.desired_value_ = threshold_value;
 
-  // The consumer_map consists of the stockname and various consumers
-  // with their threshold values. To register a consumer into this
-  // map, first the stockname is matched with an existing one (if any)
-  // and the consumer and the threshold value is attached. Else, a new
-  // entry is created for the stockname.
+  // The consumer_map consists of the stockname and various consumers with their threshold values. To register a consumer
+  // into this map, first the stockname is matched with an existing one (if any) and the consumer and the threshold value
+  // is attached. Else, a new entry is created for the stockname.
 
   auto consumers = this->consumer_map_.find (stock_name);
   if (consumers != this->consumer_map_.end ())
@@ -49,8 +42,7 @@ void Notifier_i::register_callback (const std::string& stock_name,
       throw Callback_Quoter::Invalid_Stock ("Insertion failed! Invalid Stock!\n");
     }
 
-    ; // TODO ACE_DEBUG ((LM_DEBUG, "Inserted map entry: stockname %s threshold %d",
-    // stock_name.c_str(), threshold_value));
+    taox11_debug << "Inserted map entry: stockname " << stock_name << " threshold " << threshold_value << std::endl;
   }
   else
   {
@@ -69,32 +61,27 @@ void Notifier_i::register_callback (const std::string& stock_name,
     auto result = this->consumer_map_.insert (std::make_pair (stock_name, consumers));
     if (!result.second)
     {
-      ; // TODO ACE_ERROR ((LM_ERROR, "register_callback: Bind failed!/n"));
+      taox11_error << "register_callback: Bind failed!" << std::endl;
     }
     else
     {
-      ; // TODO ACE_DEBUG ((LM_DEBUG, "new map entry: stockname %s threshold %d\n",
-        // stock_name.c_str(), threshold_value));
+      taox11_debug << "new map entry: stockname " << stock_name << " threshold " << threshold_value << std::endl;
     }
   }
 }
 
 // Obtain a pointer to the orb.
-
 void Notifier_i::orb (CORBA::ORB::_ref_type orb)
 {
   this->orb_ = std::move (orb);
 }
 
 // Remove the client handler.
-
 void Notifier_i::unregister_callback (taox11::CORBA::object_traits<Callback_Quoter::Consumer>::ref_type consumer)
 {
-  // The consumer_map consists of a map of stocknames with consumers
-  // and their threshold values attached to it. To unregister a
-  // consumer it is necessary to remove that entry from the
-  // map. Hence, the map is iterated till the consumer entry to be
-  // removed is found and then removed from the map.
+  // The consumer_map consists of a map of stocknames with consumers stock_name.c_str(), threshold_value)); and their
+  // threshold values attached to it. To unregister a consumer it is necessary to remove that entry from the map. Hence,
+  // the map is iterated till the consumer entry to be removed is found and then removed from the map.
 
   // Check to see whether the hash_map still exists. Chances are there
   // that the notifier has exited closing the hash map.
@@ -116,17 +103,15 @@ void Notifier_i::unregister_callback (taox11::CORBA::object_traits<Callback_Quot
       throw Callback_Quoter::Invalid_Handle ("Unregistration failed! Invalid Consumer Handle!\n");
     }
 
-    // TODO ACE_DEBUG ((LM_DEBUG, "unregister_callback:consumer removed\n"));
+    taox11_debug << "unregister_callback: consumer removed" << std::endl;
   }
 }
 
-// Gets the market status and sends the information to the consumer
-// who is interested in it.
-
+// Gets the market status and sends the information to the consumer who is interested in it.
 void Notifier_i::market_status (const std::string& stock_name, int32_t stock_value)
 {
-  // TODO ACE_DEBUG ((LM_DEBUG, "Notifier_i:: The stockname is %s with price %d\n",
-  // stock_name, stock_value));
+  taox11_debug << "Notifier_i::market_status: The stockname is " << stock_name << " with price " << stock_value
+               << std::endl;
 
   auto consumers = this->consumer_map_.find (stock_name);
   if (consumers != this->consumer_map_.end ())
@@ -142,7 +127,7 @@ void Notifier_i::market_status (const std::string& stock_name, int32_t stock_val
       {
         const Callback_Quoter::Info interested_consumer_data (stock_name, stock_value);
 
-        // TODO ACE_DEBUG ((LM_DEBUG, "pushing information to consumer\n"));
+        taox11_debug << "pushing information to consumer" << std::endl;
 
         // The status desired by the consumer is then passed to it.
         item.consumer_->push (interested_consumer_data);
@@ -151,11 +136,10 @@ void Notifier_i::market_status (const std::string& stock_name, int32_t stock_val
   }
   else
   {
-    ; // TODO ACE_DEBUG ((LM_DEBUG, " Stock Not Present!\n"));
+    taox11_debug << "Stock Not Present!" << std::endl;
   }
 
-  // Raising an exception caused problems as they were caught by the Market
-  // daemon who exited prematurely.
+  // Raising an exception caused problems as they were caught by the Market daemon who exited prematurely.
 }
 
 void Notifier_i::shutdown ()
@@ -166,7 +150,7 @@ void Notifier_i::shutdown ()
   // before the consumer tries to unregister after the notifier quits.
   notifier_exited_ = 1;
 
-  // TODO ACE_DEBUG ((LM_DEBUG, "The Callback Quoter server is shutting down...\n"));
+  taox11_debug << "The Callback Quoter server is shutting down..." << std::endl;
 
   // Instruct the ORB to shutdown.
   this->orb_->shutdown ();

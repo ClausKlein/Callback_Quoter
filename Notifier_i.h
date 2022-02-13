@@ -39,7 +39,7 @@ public:
   Notifier_i ();
 
   /// Destructor.
-  ~Notifier_i ();
+  ~Notifier_i () = default;
 
   /// Register a distributed callback handler that is invoked when the
   /// given stock reaches the desired threshold value.
@@ -59,8 +59,8 @@ public:
   /// Shutdown the Notifier.
   void shutdown () override;
 
-  // CONSUMER_MAP* get_consumer_map_ptr ();
-  // Returns the consumer map ptr.
+  /// Returns the consumer map ptr.
+  // XXX CONSUMER_MAP* get_consumer_map_ptr ();
 
 private:
   /// The ORB manager.
