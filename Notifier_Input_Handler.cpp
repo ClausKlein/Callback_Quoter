@@ -11,14 +11,13 @@
 
 #include "Notifier_Input_Handler.h"
 
+#include "tao/x11/log.h"
+
 #include "ace/Get_Opt.h"
 #include "ace/OS_NS_ctype.h"
 #include "ace/OS_NS_unistd.h"
 
-#include "tao/x11/log.h"
-
 // Constructor.
-
 Notifier_Input_Handler::Notifier_Input_Handler ()
   : ior_output_file_ (0)
   , argc_ (0)
@@ -27,7 +26,6 @@ Notifier_Input_Handler::Notifier_Input_Handler ()
 {}
 
 // Destructor.
-
 Notifier_Input_Handler::~Notifier_Input_Handler ()
 {
   // FIXME: Make sure to cleanup the STDIN handler.
@@ -45,7 +43,6 @@ Notifier_Input_Handler::~Notifier_Input_Handler ()
 
 // The naming service is initialized and the naming context as well as
 // the object name is bound to the naming server.
-
 int Notifier_Input_Handler::init_naming_service ()
 {
 
@@ -126,7 +123,6 @@ int Notifier_Input_Handler::parse_args ()
 }
 
 // Initialize the server.
-
 int Notifier_Input_Handler::init (int argc, ACE_TCHAR* argv[])
 {
   // Call the init of <TAO_ORB_Manager> to initialize the ORB and create the child poa under the root POA.
@@ -145,8 +141,8 @@ int Notifier_Input_Handler::init (int argc, ACE_TCHAR* argv[])
     return retval;
   }
 
-  // Register our <Input_Handler> to handle STDIN events, which will
-  // trigger the <handle_input> method to process these events.
+  // Register our <Input_Handler> to handle STDIN events, which will trigger the <handle_input> method to process these
+  // events.
 
   IDL::traits<CORBA::ORB>::ref_type orb; // FIXME: = this->orb_manager_.orb ();
 
@@ -200,9 +196,8 @@ int Notifier_Input_Handler::handle_input (ACE_HANDLE)
 
   try
   {
-    // The string could read contains \n\0 hence using ACE_OS::read
-    // which returns the no of bytes read and hence i can manipulate
-    // and remove the devil from the picture i.e '\n' ! ;)
+    // The string could read contains \n\0 hence using ACE_OS::read which returns the no of bytes read and hence i can
+    // manipulate and remove the devil from the picture i.e '\n' ! ;)
 
     ssize_t strlen = ACE_OS::read (ACE_STDIN, buf, sizeof buf);
     if (buf[strlen - 1] == '\n')

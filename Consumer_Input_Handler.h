@@ -14,13 +14,14 @@
 #ifndef CONSUMER_INPUT_HANDLER_H
 #define CONSUMER_INPUT_HANDLER_H
 
-#include "Consumer_Handler.h"
-#include "ace/Event_Handler.h"
-#include "ace/Reactor.h"
-
 #if !defined(ACE_LACKS_PRAGMA_ONCE)
 #  pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
+
+#include "Consumer_Handler.h"
+
+#include "ace/Event_Handler.h"
+#include "ace/Reactor.h"
 
 // Creating a class to handle input events.
 // Since only inputs need to be handled, only the handle_input

@@ -17,6 +17,7 @@ $sleeptime = 15;
 foreach $i (@ARGV) {
     if ($i eq '-debug') {
         $debug_level = '10';
+        $ENV{ACE_TEST_VERBOSE} = 1;
     }
 }
 

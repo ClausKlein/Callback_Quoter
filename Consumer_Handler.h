@@ -13,19 +13,18 @@
 #ifndef CONSUMER_HANDLER_H
 #define CONSUMER_HANDLER_H
 
-#include "ConsumerC.h"
-#include "Consumer_i.h"
-#include "NotifierC.h"
-#include "ace/Read_Buffer.h"
-
 #if !defined(ACE_LACKS_PRAGMA_ONCE)
 #  pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include "Naming_Client.h"
-
+#include "ConsumerC.h"
 #include "Consumer_Input_Handler.h"
 #include "Consumer_Signal_Handler.h"
+#include "Consumer_i.h"
+#include "Naming_Client.h"
+#include "NotifierC.h"
+
+#include "ace/Read_Buffer.h"
 
 class Consumer_Input_Handler;
 class Consumer_Signal_Handler;

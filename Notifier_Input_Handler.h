@@ -12,9 +12,14 @@
 #ifndef SUPPLIER_INPUT_HANDLER_H
 #define SUPPLIER_INPUT_HANDLER_H
 
+#if !defined(ACE_LACKS_PRAGMA_ONCE)
+#  pragma once
+#endif /* ACE_LACKS_PRAGMA_ONCE */
+
 #include "Naming_Client.h"
 #include "NotifierS.h"
 #include "Notifier_i.h"
+
 #include "ace/Event_Handler.h"
 // FIXME #include "tao/Utils/ORB_Manager.h"
 

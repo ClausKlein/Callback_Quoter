@@ -37,6 +37,7 @@ BraceWrapping:
   SplitEmptyNamespace: true
 # based on BreakBeforeBraces: GNU
 ColumnLimit: 123 # MAYBE up to 160
+FixNamespaceComments: true
 #
 # XXX v13.0 only IndentAccessModifiers: true
 #
@@ -46,4 +47,21 @@ SpaceAfterTemplateKeyword: true
 SpaceAfterLogicalNot: false
 SpaceBeforeParens: Always
 SpaceInEmptyBlock: false
+# NOTE: use only Preserve! CK
+IncludeBlocks:   Preserve
+IncludeCategories:
+  - Regex:           '^"(llvm|llvm-c|clang|clang-c)/'
+    Priority:        2
+    SortPriority:    0
+    CaseSensitive:   false
+  - Regex:           '^(<|"(ace|tao|orbsvcs|boost|fmt|json|spdlog)/)'
+    Priority:        3
+    SortPriority:    0
+    CaseSensitive:   false
+  - Regex:           '.*'
+    Priority:        1
+    SortPriority:    0
+    CaseSensitive:   false
+IncludeIsMainRegex: '(Test)?$'
+IncludeIsMainSourceRegex: ''
 ...

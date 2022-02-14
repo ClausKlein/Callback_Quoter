@@ -12,6 +12,11 @@
 
 #ifndef CONSUMER_I_H
 #define CONSUMER_I_H
+
+#if !defined(ACE_LACKS_PRAGMA_ONCE)
+#  pragma once
+#endif /* ACE_LACKS_PRAGMA_ONCE */
+
 #include "ConsumerC.h"
 #include "ConsumerS.h"
 #include "NotifierS.h"

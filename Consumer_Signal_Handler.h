@@ -13,7 +13,12 @@
 #ifndef CONSUMER_SIGNAL_HANDLER_H
 #define CONSUMER_SIGNAL_HANDLER_H
 
+#if !defined(ACE_LACKS_PRAGMA_ONCE)
+#  pragma once
+#endif /* ACE_LACKS_PRAGMA_ONCE */
+
 #include "Consumer_Handler.h"
+
 #include "ace/Event_Handler.h"
 #include "ace/Reactor.h"
 

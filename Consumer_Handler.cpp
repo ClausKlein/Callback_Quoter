@@ -11,6 +11,8 @@
 
 #include "Consumer_Handler.h"
 
+#include "Naming_Client.h"
+
 #include "tao/x11/log.h"
 
 #include "ace/Event_Handler.h"
@@ -50,7 +52,6 @@ Consumer_Handler::~Consumer_Handler ()
 }
 
 // Reads the Server factory IOR from a file.
-
 int Consumer_Handler::read_ior (ACE_TCHAR* filename)
 {
   // Open the file for reading.
@@ -78,7 +79,6 @@ int Consumer_Handler::read_ior (ACE_TCHAR* filename)
 }
 
 // Parses the command line arguments and returns an error status.
-
 int Consumer_Handler::parse_args ()
 {
   ACE_Get_Opt get_opts (argc_, argv_, ACE_TEXT ("a:t:d:f:xk:xs"));
@@ -144,36 +144,58 @@ int Consumer_Handler::parse_args ()
 }
 
 // this method uses the naming service to obtain the server object refernce.
-
 int Consumer_Handler::via_naming_service ()
 {
-#if 0
-    try
+#if 1
+  // Get reference to initial naming context.
+  IDL::traits<CosNaming::NamingContext>::ref_type inc = resolve_init<CosNaming::NamingContext> (this->orb_, "NameService");
+
+  try
+  {
+    // Look for Notifier in the Naming Service.
+    CosNaming::Name n (1);
+    n[0].id ("Notifier");
+
+    IDL::traits<CORBA::Object>::ref_type notifier_obj = resolve_name<Notifier> (inc, n);
+    if (notifier_obj == nullptr)
     {
-        // Initialization of the naming service.
-        if (naming_services_client_.init (orb_) != 0)
-            ACE_ERROR_RETURN ((LM_ERROR,
-                               " (%P|%t) Unable to initialize "
-                               "the TAO_Naming_Client.\n"),
-                              -1);
-
-        CosNaming::Name notifier_ref_name (1);
-        notifier_ref_name.length (1);
-        notifier_ref_name[0].id = CORBA::string_dup ("Notifier");
-
-        IDL::traits<CORBA::Object>::ref_type notifier_obj = this->naming_services_client_->resolve (notifier_ref_name);
-
-        // The CORBA::Object_var object is downcast to Notifier_var using
-        // the <narrow> method.
-        this->server_ = Notifier::narrow (notifier_obj);
+      taox11_error << "ERROR : resolved Notifier seems nill" << std::endl;
+      return -1;
     }
-    catch (const CORBA::Exception& ex)
-#endif
 
+    // The CORBA::Object object is downcast to Notifier using the <narrow> method.
+    this->server_ = IDL::traits<Notifier>::narrow (notifier_obj);
+  }
+  catch (const CosNaming::NamingContext::NotFound& ex)
+  {
+    taox11_error << "No Notifier in Naming Service" << ex << std::endl;
+    return -1;
+  }
+#else
+  try
+  {
+    // Initialization of the naming service.
+    if (naming_services_client_.init (orb_) != 0)
+      ACE_ERROR_RETURN ((LM_ERROR,
+                         " (%P|%t) Unable to initialize "
+                         "the TAO_Naming_Client.\n"),
+                        -1);
+
+    CosNaming::Name notifier_ref_name (1);
+    notifier_ref_name.length (1);
+    notifier_ref_name[0].id = CORBA::string_dup ("Notifier");
+
+    IDL::traits<CORBA::Object>::ref_type notifier_obj = this->naming_services_client_->resolve (notifier_ref_name);
+
+    // The CORBA::Object object is downcast to Notifier using the <narrow> method.
+    this->server_ = IDL::traits<Notifier>::narrow (notifier_obj);
+  }
+  catch (const CORBA::Exception& ex)
   {
     taox11_error << "Exception in Consumer_Handler::via_naming_service(): " << std::endl;
     return -1;
   }
+#endif
 
   return 0;
 }
@@ -205,11 +227,14 @@ int Consumer_Handler::init (int argc, ACE_TCHAR** argv)
 
       ACE_NEW_RETURN (consumer_input_handler_, Consumer_Input_Handler (this), -1);
 
-      // FIXME: if (ACE_Event_Handler::register_stdin_handler (consumer_input_handler_, this->orb_->orb_core ()->reactor
-      // (), this->orb_->orb_core ()->thr_mgr ()) == -1)
+      // FIXME: TODO!
+#if 0
+      if (ACE_Event_Handler::register_stdin_handler (
+            consumer_input_handler_, this->orb_->orb_core ()->reactor (), this->orb_->orb_core ()->thr_mgr ()) == -1)
       {
-        // ACE_ERROR_RETURN ((LM_ERROR, "%p\n", "register_stdin_handler"), -1);
+        ACE_ERROR_RETURN ((LM_ERROR, "%p\n", "register_stdin_handler"), -1);
       }
+#endif
 
       // Register the signal event handler for ^C
       ACE_NEW_RETURN (consumer_signal_handler_, Consumer_Signal_Handler (this), -1);
@@ -221,6 +246,7 @@ int Consumer_Handler::init (int argc, ACE_TCHAR** argv)
       }
 #endif
     }
+
     // use the naming service.
     if (this->use_naming_service_)
     {
@@ -231,7 +257,6 @@ int Consumer_Handler::init (int argc, ACE_TCHAR** argv)
     }
     else
     {
-
       if (this->ior_ == nullptr)
       {
         ACE_ERROR_RETURN ((LM_ERROR, "%s: no ior specified\n", this->argv_[0]), -1);
@@ -243,8 +268,8 @@ int Consumer_Handler::init (int argc, ACE_TCHAR** argv)
       {
         ACE_ERROR_RETURN ((LM_ERROR, "invalid ior <%s>\n", this->ior_), -1);
       }
-      // The downcasting from CORBA::Object_var to Notifier_var is
-      // done using the <narrow> method.
+
+      // The downcasting from CORBA::Object to Notifier is done using the <narrow> method.
       this->server_ = IDL::traits<Notifier>::narrow (server_object);
     }
   }

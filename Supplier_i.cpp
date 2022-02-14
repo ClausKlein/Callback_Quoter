@@ -9,6 +9,9 @@
 //=============================================================================
 
 #include "Supplier_i.h"
+
+#include "Naming_Client.h"
+
 #include "ace/Get_Opt.h"
 #include "ace/OS_NS_fcntl.h"
 #include "ace/OS_NS_stdio.h"
@@ -177,39 +180,61 @@ int Supplier::run ()
 
 int Supplier::via_naming_service ()
 {
-  // TODO: refactory! CK
 
-#if 0
-    try
-    {
-        // Initialization of the naming service.
-        if (naming_services_client_.init (orb_) != 0)
-            ACE_ERROR_RETURN ((LM_ERROR,
-                               " (%P|%t) Unable to initialize "
-                               "the TAO_Naming_Client.\n"),
-                              -1);
-        CosNaming::Name notifier_ref_name (1);
-        notifier_ref_name.length (1);
-        notifier_ref_name[0].id = CORBA::string_dup ("Notifier");
+#if 1
+  // Get reference to initial naming context.
+  IDL::traits<CosNaming::NamingContext>::ref_type inc = resolve_init<CosNaming::NamingContext> (this->orb_, "NameService");
 
-        IDL::traits<CORBA::Object>::ref_type notifier_obj = this->naming_services_client_->resolve (notifier_ref_name);
-
-        // The CORBA::Object object is downcast to Notifier
-        // using the <_narrow> method.
-        this->notifier_ = Notifier::_narrow (notifier_obj);
-    }
-    catch (const CORBA::SystemException& sysex)
-    {
-        //TODO sysex._tao_print_exception ("System Exception : Supplier::via_naming_service\n");
-        return -1;
-    }
-    catch (const CORBA::UserException& userex)
-#endif
-
+  try
   {
-    taox11_error << "Exception : Supplier::via_naming_service()" << std::endl;
+    // Look for Notifier in the Naming Service.
+    CosNaming::Name n (1);
+    n[0].id ("Notifier");
+
+    IDL::traits<CORBA::Object>::ref_type notifier_obj = resolve_name<Notifier> (inc, n);
+    if (notifier_obj == nullptr)
+    {
+      taox11_error << "ERROR : resolved Notifier seems nill" << std::endl;
+      return -1;
+    }
+
+    // The CORBA::Object object is downcast to Notifier using the <narrow> method.
+    this->notifier_ = IDL::traits<Notifier>::narrow (notifier_obj);
+  }
+  catch (const CosNaming::NamingContext::NotFound& ex)
+  {
+    taox11_error << "No Notifier in Naming Service" << ex << std::endl;
     return -1;
   }
+#else
+  try
+  {
+    // Initialization of the naming service.
+    if (naming_services_client_.init (orb_) != 0)
+      ACE_ERROR_RETURN ((LM_ERROR,
+                         " (%P|%t) Unable to initialize "
+                         "the TAO_Naming_Client.\n"),
+                        -1);
+    CosNaming::Name notifier_ref_name (1);
+    notifier_ref_name.length (1);
+    notifier_ref_name[0].id = CORBA::string_dup ("Notifier");
+
+    IDL::traits<CORBA::Object>::ref_type notifier_obj = this->naming_services_client_->resolve (notifier_ref_name);
+
+    // The CORBA::Object object is downcast to Notifier using the <_narrow> method.
+    this->notifier_ = IDL::traits<Notifier>::narrow (notifier_obj);
+  }
+  catch (const CORBA::SystemException& sysex)
+  {
+    taox11_error << "Exception : Supplier::via_naming_service()" << sysex << std::endl;
+    return -1;
+  }
+  catch (const CORBA::UserException& userex)
+  {
+    taox11_error << "Exception : Supplier::via_naming_service()" << userex << std::endl;
+    return -1;
+  }
+#endif
 
   return 0;
 }

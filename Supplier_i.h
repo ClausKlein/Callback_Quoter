@@ -13,15 +13,16 @@
 #ifndef SUPPLIER_I_H
 #define SUPPLIER_I_H
 
-#include "Naming_Client.h"
-#include "NotifierC.h"
-#include "Supplier_Timer_Handler.h"
-#include "ace/Reactor.h"
-#include "ace/Read_Buffer.h"
-
 #if !defined(ACE_LACKS_PRAGMA_ONCE)
 #  pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
+
+#include "Naming_Client.h"
+#include "NotifierC.h"
+#include "Supplier_Timer_Handler.h"
+
+#include "ace/Reactor.h"
+#include "ace/Read_Buffer.h"
 
 /**
  * @class Supplier

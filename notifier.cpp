@@ -22,7 +22,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR* argv[])
   }
   catch (const CORBA::SystemException& sysex)
   {
-    // TODO sysex._tao_print_exception ("System Exception");
     taox11_error << "System Exception: " << sysex << std::endl;
     return -1;
   }
