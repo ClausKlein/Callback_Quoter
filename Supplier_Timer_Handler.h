@@ -60,10 +60,10 @@ private:
   FILE* file_ptr_;
 
   /// The name of the stock.
-  char stockname_[BUFSIZ] {};
+  char stockname_[BUFSIZ]{};
 
   /// The market value of the stock.It will be typecasted to long later.
-  int32_t value_ {-1};
+  int32_t value_{ -1 };
 };
 
 #endif /* SUPPLIER_TIMER_HANDLER_H */

@@ -21,7 +21,6 @@
 #include "Notifier_i.h"
 
 #include "ace/Event_Handler.h"
-// FIXME #include "tao/Utils/ORB_Manager.h"
 
 /**
  * @class Notifier_Input_Handler
@@ -52,9 +51,6 @@ public:
   virtual int handle_input (ACE_HANDLE);
 
 private:
-  /// The tao orb manager object.
-  // FIXME TAO_ORB_Manager orb_manager_;
-
   /// Parses the command line arguments.
   int parse_args ();
 
@@ -73,9 +69,6 @@ private:
 
   /// Naming context for the naming service.
   IDL::traits<CosNaming::NamingContext>::ref_type naming_context_;
-
-  /// helper class for getting access to Naming Service.
-  // XXX TAO_Naming_Client naming_server_;
 
   /// The servant object registered with the orb.
   Notifier_i notifier_i_;

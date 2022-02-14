@@ -68,8 +68,8 @@ public:
   /// Pointer to the consumer object registered with the ORB.
   IDL::traits<Callback_Quoter::Consumer>::ref_type consumer_var_;
 
-  /// This method gives the reactor pointer.
-  ACE_Reactor* reactor_used () const;
+  /// returns the TAO instance of the singleton Reactor.
+  static ACE_Reactor* reactor_used ();
 
   /// Flag which notes whether the consumer has got registered with the
   /// Notifier-server.

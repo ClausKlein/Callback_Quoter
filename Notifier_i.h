@@ -52,14 +52,14 @@ public:
   /// Get the market status.
   void market_status (const std::string& stock_name, int32_t stock_value) override;
 
-  /// Get the orb pointer.
+  /// Set the orb pointer.
   void orb (CORBA::ORB::_ref_type orb);
+
+  /// Get the orb pointer.
+  CORBA::ORB::_ref_type orb ();
 
   /// Shutdown the Notifier.
   void shutdown () override;
-
-  /// Returns the consumer map ptr.
-  // XXX CONSUMER_MAP* get_consumer_map_ptr ();
 
 private:
   /// The ORB manager.

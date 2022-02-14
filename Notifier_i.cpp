@@ -23,7 +23,7 @@ Notifier_i::Notifier_i ()
 // Register a distributed callback handler that is invoked when the given stock reaches the desired threshold value.
 void Notifier_i::register_callback (const std::string& stock_name,
                                     int32_t threshold_value,
-                                    taox11::CORBA::object_traits<Callback_Quoter::Consumer>::ref_type consumer_handler)
+                                    IDL::traits<Callback_Quoter::Consumer>::ref_type consumer_handler)
 {
   // Store the client information.
   Consumer_Data consumer_data;
@@ -70,21 +70,26 @@ void Notifier_i::register_callback (const std::string& stock_name,
   }
 }
 
-// Obtain a pointer to the orb.
+// Set a reference to the orb.
 void Notifier_i::orb (CORBA::ORB::_ref_type orb)
 {
   this->orb_ = std::move (orb);
 }
 
+// Obtain the orb reference.
+CORBA::ORB::_ref_type Notifier_i::orb ()
+{
+  return this->orb_;
+}
+
 // Remove the client handler.
-void Notifier_i::unregister_callback (taox11::CORBA::object_traits<Callback_Quoter::Consumer>::ref_type consumer)
+void Notifier_i::unregister_callback (IDL::traits<Callback_Quoter::Consumer>::ref_type consumer)
 {
   // The consumer_map consists of a map of stocknames with consumers stock_name.c_str(), threshold_value)); and their
   // threshold values attached to it. To unregister a consumer it is necessary to remove that entry from the map. Hence,
   // the map is iterated till the consumer entry to be removed is found and then removed from the map.
 
-  // Check to see whether the hash_map still exists. Chances are there
-  // that the notifier has exited closing the hash map.
+  // Check to see whether the hash_map still exists. Chances are there that the notifier has exited closing the hash map.
   if (notifier_exited_ == 1)
   {
     return;
@@ -95,8 +100,7 @@ void Notifier_i::unregister_callback (taox11::CORBA::object_traits<Callback_Quot
 
   for (auto& iter : this->consumer_map_)
   {
-    // The *iter is nothing but the stockname + unbounded set of
-    // consumers+threshold values, i.e a Hash_Map_Entry.
+    // The iter is nothing but the stockname + unbounded set of consumers+threshold values, i.e a Hash_Map_Entry.
 
     if (iter.second.erase (consumer_to_remove) == 0)
     {
@@ -116,13 +120,11 @@ void Notifier_i::market_status (const std::string& stock_name, int32_t stock_val
   auto consumers = this->consumer_map_.find (stock_name);
   if (consumers != this->consumer_map_.end ())
   {
-    // Go through the list of <Consumer_Data> to find which
-    // registered client wants to be notified.
+    // Go through the list of <Consumer_Data> to find which registered client wants to be notified.
 
     for (auto& item : consumers->second)
     {
-      // Check whether the stockname is equal before proceeding
-      // further.
+      // Check whether the stockname is equal before proceeding further.
       if (stock_value >= item.desired_value_)
       {
         const Callback_Quoter::Info interested_consumer_data (stock_name, stock_value);

@@ -23,19 +23,19 @@ foreach $i (@ARGV) {
 
 my $nstarget = PerlACE::TestTarget::create_target (1) || die "Create target 1 failed\n";
 my $ntarget = PerlACE::TestTarget::create_target (2) || die "Create target 2 failed\n";
-my $ctarget = PerlACE::TestTarget::create_target (3) || die "Create target 3 failed\n";
+my $c1target = PerlACE::TestTarget::create_target (3) || die "Create target 3 failed\n";
 my $starget = PerlACE::TestTarget::create_target (4) || die "Create target 4 failed\n";
 
 my $nsiorbase = "ns.ior";
 my $examplebase = "example.stocks";
 my $nstarget_nsiorfile = $nstarget->LocalFile ($nsiorbase);
 my $ntarget_nsiorfile = $ntarget->LocalFile ($nsiorbase);
-my $ctarget_nsiorfile = $ctarget->LocalFile ($nsiorbase);
+my $ctarget_nsiorfile = $c1target->LocalFile ($nsiorbase);
 my $starget_nsiorfile = $starget->LocalFile ($nsiorbase);
 my $starget_examplefile = $starget->LocalFile ($examplebase);
 $nstarget->DeleteFile($nsiorbase);
 $ntarget->DeleteFile($nsiorbase);
-$ctarget->DeleteFile($nsiorbase);
+$c1target->DeleteFile($nsiorbase);
 $starget->DeleteFile($nsiorbase);
 
 # Programs that are run
@@ -47,7 +47,7 @@ $N = $ntarget->CreateProcess (
     "notifier",
     "-ORBDebugLevel $debug_level ".
     "-ORBInitRef NameService=file://$ntarget_nsiorfile");
-$C = $ctarget->CreateProcess (
+$C1 = $c1target->CreateProcess (
     "consumer",
     "-ORBInitRef NameService=file://$ctarget_nsiorfile -t 12 -a TAO");
 $S = $starget->CreateProcess (
@@ -79,7 +79,7 @@ if ($ntarget->PutFile ($nsiorbase) == -1) {
     $NS->Kill (); $NS->TimedWait (1);
     exit 1;
 }
-if ($ctarget->PutFile ($nsiorbase) == -1) {
+if ($c1target->PutFile ($nsiorbase) == -1) {
     print STDERR "ERROR: cannot set file <$ctarget_nsiorfile>\n";
     $NS->Kill (); $NS->TimedWait (1);
     exit 1;
@@ -99,10 +99,10 @@ if ($n_status != 0) {
 }
 sleep $sleeptime;
 
-$c_status = $C->Spawn ();
+$c1_status = $C1->Spawn ();
 
-if ($c_status != 0) {
-    print STDERR "ERROR: consumer returned $c_status\n";
+if ($c1_status != 0) {
+    print STDERR "ERROR: consumer returned $c1_status\n";
     $NS->Kill (); $NS->TimedWait (1);
     $N->Kill (); $N->TimedWait (1);
     exit 1;
@@ -115,14 +115,14 @@ if ($s_status != 0) {
     print STDERR "ERROR: supplier returned $s_status\n";
     $NS->Kill (); $NS->TimedWait (1);
     $N->Kill (); $N->TimedWait (1);
-    $C->Kill (); $C->TimedWait (1);
+    $C1->Kill (); $C1->TimedWait (1);
     exit 1;
 }
 
-$c_status = $C->TerminateWaitKill ($ctarget->ProcessStopWaitInterval());
+$c1_status = $C1->TerminateWaitKill ($c1target->ProcessStopWaitInterval());
 
-if ($c_status != 0) {
-    print STDERR "ERROR: consumer returned $c_status\n";
+if ($c1_status != 0) {
+    print STDERR "ERROR: consumer returned $c1_status\n";
     $status = 1;
 }
 
@@ -142,7 +142,7 @@ if ($ns_status != 0) {
 
 $nstarget->DeleteFile($nsiorbase);
 $ntarget->DeleteFile($nsiorbase);
-$ctarget->DeleteFile($nsiorbase);
+$c1target->DeleteFile($nsiorbase);
 $starget->DeleteFile($nsiorbase);
 
 exit $status;

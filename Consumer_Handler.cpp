@@ -15,6 +15,18 @@
 
 #include "tao/x11/log.h"
 
+#undef USE_ORB_PROXY // FIXME: does not compile! CK
+#ifdef USE_ORB_PROXY
+
+#  include "tao/x11/orb.h"
+
+#  include "tao/x11/orbproxy.h" // ORB_Proxy& proxy()
+// FIXME: using TAO_3_0_6::CORBA as CORBA;
+// FIXME: using TAOX11_NAMESPACE::CORBA as CORBA;
+using namespace TAOX11_NAMESPACE;
+
+#endif
+
 #include "ace/Event_Handler.h"
 #include "ace/Get_Opt.h"
 #include "ace/OS_NS_fcntl.h"
@@ -30,20 +42,20 @@ Consumer_Handler::Consumer_Handler ()
   , ior_ (nullptr)
   , shutdown_ (0)
   , use_naming_service_ (1)
-  , interactive_ (1)
+  , interactive_ (0)
 {}
 
 Consumer_Handler::~Consumer_Handler ()
 {
-  // FIXME: Make sure to cleanup the STDIN handler.
 
   if (this->interactive_ == 1)
   {
+    // Make sure to cleanup the STDIN handler.
 
-#if 0
-    if (ACE_Event_Handler::remove_stdin_handler (this->orb_->orb_core ()->reactor (), this->orb_->orb_core ()->thr_mgr ()) == -1)
+#ifdef USE_ORB_PROXY
+    if (ACE_Event_Handler::remove_stdin_handler (reactor_used (), this->orb_->proxy ().orb_core ()->thr_mgr ()) == -1)
     {
-       ACE_ERROR ((LM_ERROR, "%p\n", "remove_stdin_handler"));
+      ACE_ERROR ((LM_ERROR, "%p\n", "remove_stdin_handler"));
     }
 #endif
 
@@ -146,6 +158,7 @@ int Consumer_Handler::parse_args ()
 // this method uses the naming service to obtain the server object refernce.
 int Consumer_Handler::via_naming_service ()
 {
+
 #if 1
   // Get reference to initial naming context.
   IDL::traits<CosNaming::NamingContext>::ref_type inc = resolve_init<CosNaming::NamingContext> (this->orb_, "NameService");
@@ -174,8 +187,8 @@ int Consumer_Handler::via_naming_service ()
 #else
   try
   {
-    // Initialization of the naming service.
-    if (naming_services_client_.init (orb_) != 0)
+    // XXX Initialization of the naming service.
+    if (this->naming_services_client_.init (orb_) != 0)
       ACE_ERROR_RETURN ((LM_ERROR,
                          " (%P|%t) Unable to initialize "
                          "the TAO_Naming_Client.\n"),
@@ -227,10 +240,9 @@ int Consumer_Handler::init (int argc, ACE_TCHAR** argv)
 
       ACE_NEW_RETURN (consumer_input_handler_, Consumer_Input_Handler (this), -1);
 
-      // FIXME: TODO!
-#if 0
+#ifdef USE_ORB_PROXY
       if (ACE_Event_Handler::register_stdin_handler (
-            consumer_input_handler_, this->orb_->orb_core ()->reactor (), this->orb_->orb_core ()->thr_mgr ()) == -1)
+            consumer_input_handler_, reactor_used (), this->orb_->proxy ().orb_core ()->thr_mgr ()) == -1)
       {
         ACE_ERROR_RETURN ((LM_ERROR, "%p\n", "register_stdin_handler"), -1);
       }
@@ -239,12 +251,10 @@ int Consumer_Handler::init (int argc, ACE_TCHAR** argv)
       // Register the signal event handler for ^C
       ACE_NEW_RETURN (consumer_signal_handler_, Consumer_Signal_Handler (this), -1);
 
-#if 0
-      if (this->reactor_used ()->register_handler (SIGINT, consumer_signal_handler_) == -1)
+      if (reactor_used ()->register_handler (SIGINT, consumer_signal_handler_) == -1)
       {
         ACE_ERROR_RETURN ((LM_ERROR, "%p\n", "register_handler for SIGINT"), -1);
       }
-#endif
     }
 
     // use the naming service.
@@ -326,8 +336,7 @@ int Consumer_Handler::run ()
   return 0;
 }
 
-ACE_Reactor* Consumer_Handler::reactor_used () const
+ACE_Reactor* Consumer_Handler::reactor_used ()
 {
-  // FIXME: return this->orb_->orb_core ()->reactor ();
-  return nullptr;
+  return ACE_Reactor::instance ();
 }

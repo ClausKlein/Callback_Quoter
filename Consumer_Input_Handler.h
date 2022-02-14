@@ -82,7 +82,7 @@ public:
 
 protected:
   /// the destructor.
-  ~Consumer_Input_Handler ();
+  ~Consumer_Input_Handler () = default;
 
 private:
   /// The Consumer_Handler object.

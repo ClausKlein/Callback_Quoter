@@ -114,8 +114,7 @@ int Consumer_Input_Handler::register_consumer ()
 
 int Consumer_Input_Handler::unregister_consumer ()
 {
-  // Only if the consumer is registered can the
-  // unregistration take place.
+  // Only if the consumer is registered can the unregistration take place.
 
   if (consumer_handler_->registered_ == 1)
   {
@@ -126,24 +125,20 @@ int Consumer_Input_Handler::unregister_consumer ()
     consumer_handler_->registered_ = 0;
     return 0;
   }
-  else
-  {
-    taox11_debug << " Invalid Operation: Consumer not Registered\n";
-    return -1;
-  }
+
+  taox11_debug << " Invalid Operation: Consumer not Registered\n";
+  return -1;
 }
 
 int Consumer_Input_Handler::quit_consumer_process ()
 {
-  // Only if the consumer is registered and wants to shut
-  // down, its necessary to unregister and then shutdown.
+  // Only if the consumer is registered and wants to shut down, its necessary to unregister and then shutdown.
 
   try
   {
     if (consumer_handler_->unregistered_ != 1 && consumer_handler_->registered_ == 1)
     {
-      // If the notifier has exited and the consumer tries to call
-      // the unregister_callback method tehn an exception will be
+      // If the notifier has exited and the consumer tries to call the unregister_callback method tehn an exception will be
       // raised. Hence check for this case using.
       this->consumer_handler_->server_->unregister_callback (this->consumer_handler_->consumer_var_);
 
@@ -155,9 +150,8 @@ int Consumer_Input_Handler::quit_consumer_process ()
   }
   catch (const CORBA::Exception& ex)
   {
-    // There would be an exception only if there is a communication
-    // failure between the notifier and consumer. On catching the
-    // exception proclaim the problem and do a graceful exit.
+    // There would be an exception only if there is a communication failure between the notifier and consumer. On catching
+    // the exception proclaim the problem and do a graceful exit.
     taox11_error << "Exception in Consumer_Input_Handler::quit_consumer_process(): " << ex << std::endl;
 
     try
@@ -173,9 +167,4 @@ int Consumer_Input_Handler::quit_consumer_process ()
   }
 
   return 0;
-}
-
-Consumer_Input_Handler::~Consumer_Input_Handler ()
-{
-  // No-op
 }

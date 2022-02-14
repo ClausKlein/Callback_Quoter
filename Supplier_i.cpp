@@ -21,7 +21,6 @@
 #include "ace/Read_Buffer.h"
 
 // Constructor.
-
 Supplier::Supplier ()
   : ior_ (nullptr)
   , use_naming_service_ (1)
@@ -175,7 +174,7 @@ int Supplier::run ()
   }
 
   // The reactor starts executing in a loop.
-  return this->reactor_used ()->run_reactor_event_loop ();
+  return reactor_used ()->run_reactor_event_loop ();
 }
 
 int Supplier::via_naming_service ()
@@ -209,8 +208,8 @@ int Supplier::via_naming_service ()
 #else
   try
   {
-    // Initialization of the naming service.
-    if (naming_services_client_.init (orb_) != 0)
+    // XXX Initialization of the naming service.
+    if (this->naming_services_client_.init (orb_) != 0)
       ACE_ERROR_RETURN ((LM_ERROR,
                          " (%P|%t) Unable to initialize "
                          "the TAO_Naming_Client.\n"),
@@ -257,7 +256,7 @@ int Supplier::init (int argc, ACE_TCHAR** argv)
     }
 
     // Create the Timer_Handler.
-    ACE_NEW_RETURN (supplier_timer_handler_, Supplier_Timer_Handler (this, this->reactor_used (), this->f_ptr_), -1);
+    ACE_NEW_RETURN (supplier_timer_handler_, Supplier_Timer_Handler (this, reactor_used (), this->f_ptr_), -1);
 
     if (this->use_naming_service_)
     {
@@ -292,7 +291,7 @@ int Supplier::init (int argc, ACE_TCHAR** argv)
   return 0;
 }
 
-ACE_Reactor* Supplier::reactor_used () const
+ACE_Reactor* Supplier::reactor_used ()
 {
   return ACE_Reactor::instance ();
 }
