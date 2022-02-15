@@ -48,9 +48,11 @@ $N = $ntarget->CreateProcess (
     "-ORBDebugLevel $debug_level ".
     "-ORBInitRef NameService=file://$ntarget_nsiorfile");
 $C1 = $c1target->CreateProcess (
+    "-ORBDebugLevel $debug_level ".
     "consumer",
     "-ORBInitRef NameService=file://$ctarget_nsiorfile -t 12 -a TAO");
 $S = $starget->CreateProcess (
+    "-ORBDebugLevel $debug_level ".
     "supplier",
     "-ORBInitRef NameService=file://$starget_nsiorfile -i $starget_examplefile");
 

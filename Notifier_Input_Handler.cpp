@@ -54,22 +54,29 @@ int Notifier_Input_Handler::init_naming_service ()
 
   try
   {
-    // Look for Notifier in the Naming Service.
+    // TODO: check this! CK
+    // register the Notifier to the Naming Service.
     CosNaming::Name n (1);
     n[0].id ("Notifier");
 
-    IDL::traits<CORBA::Object>::ref_type notifier_obj = resolve_name<Notifier> (inc, n);
-    if (notifier_obj == nullptr)
+    try
     {
-      taox11_error << "ERROR : resolved Notifier seems nill" << std::endl;
-      return -1;
+      IDL::traits<CosNaming::NamingContext>::ref_type nc = inc->bind_new_context (n);
+    }
+    catch (const CosNaming::NamingContext::AlreadyBound&)
+    {
+      // Fine, Notifer context already exists.
+      taox11_debug << "Notifer context already exists" << std::endl;
     }
 
-    // FIXME: TODO! CK
+    IDL::traits<Notifier>::ref_type notifier_obj = notifier_i_._this ();
+
+    // Force binding of controller reference to make sure it is always up-to-date.
+    inc->rebind (n, notifier_obj);
   }
   catch (const CosNaming::NamingContext::NotFound& ex)
   {
-    taox11_error << "No Notifier in Naming Service" << ex << std::endl;
+    taox11_error << "Unable to bind Notifier to Naming Service" << ex << std::endl;
     return -1;
   }
 #else
