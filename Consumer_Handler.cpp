@@ -29,25 +29,27 @@ using namespace TAOX11_NAMESPACE;
 
 #include "ace/Event_Handler.h"
 #include "ace/Get_Opt.h"
-#include "ace/OS_NS_fcntl.h"
-#include "ace/Reactor.h"
-#include "ace/Read_Buffer.h"
+
+#include <fstream>
 
 Consumer_Handler::Consumer_Handler ()
   : stock_name_ ("Unknown")
   , threshold_value_ (0)
-  , server_ ()
+  , consumer_servant_ (nullptr)
   , registered_ (0)
   , unregistered_ (0)
-  , ior_ (nullptr)
+  , argc_ (0)
+  , argv_ (nullptr)
+  , ior_ ()
   , shutdown_ (0)
   , use_naming_service_ (1)
+  , consumer_input_handler_ (nullptr)
+  , consumer_signal_handler_ (nullptr)
   , interactive_ (0)
 {}
 
 Consumer_Handler::~Consumer_Handler ()
 {
-
   if (this->interactive_ == 1)
   {
     // Make sure to cleanup the STDIN handler.
@@ -64,28 +66,18 @@ Consumer_Handler::~Consumer_Handler ()
 }
 
 // Reads the Server factory IOR from a file.
-int Consumer_Handler::read_ior (ACE_TCHAR* filename)
+int Consumer_Handler::read_ior (const std::string& filename)
 {
   // Open the file for reading.
-  ACE_HANDLE f_handle = ACE_OS::open (filename, 0);
-
-  if (f_handle == ACE_INVALID_HANDLE)
+  std::ifstream fis (filename);
+  if (!fis)
   {
-    ACE_ERROR_RETURN ((LM_ERROR, "Unable to open %s for reading: %p\n", filename), -1);
+    taox11_error << "ERROR: failed to open file: " << filename << std ::endl;
+    return -1;
   }
 
-  ACE_Read_Buffer ior_buffer (f_handle);
-  char* data = ior_buffer.read ();
-
-  if (data == nullptr)
-  {
-    ACE_ERROR_RETURN ((LM_ERROR, "Unable to read ior: %p\n"), -1);
-  }
-
-  this->ior_ = ACE_OS::strdup (ACE_TEXT_CHAR_TO_TCHAR (data));
-  ior_buffer.alloc ()->free (data);
-
-  ACE_OS::close (f_handle);
+  std::getline (fis, this->ior_);
+  fis.close ();
 
   return 0;
 }
@@ -106,7 +98,7 @@ int Consumer_Handler::parse_args ()
         break;
 
       case 'k': // ior provide on command line
-        this->ior_ = ACE_OS::strdup (get_opts.opt_arg ());
+        this->ior_ = get_opts.opt_arg ();
         break;
 
       case 'f': // read the IOR from the file.
@@ -196,7 +188,7 @@ int Consumer_Handler::via_naming_service ()
 
     CosNaming::Name notifier_ref_name (1);
     notifier_ref_name.length (1);
-    notifier_ref_name[0].id = CORBA::string_dup ("Notifier");
+    notifier_ref_name[0].id = "Notifier";
 
     IDL::traits<CORBA::Object>::ref_type notifier_obj = this->naming_services_client_->resolve (notifier_ref_name);
 
@@ -214,7 +206,7 @@ int Consumer_Handler::via_naming_service ()
 }
 
 // Init function.
-int Consumer_Handler::init (int argc, ACE_TCHAR** argv)
+int Consumer_Handler::init (int argc, char** argv)
 {
   this->argc_ = argc;
   this->argv_ = argv;
@@ -267,7 +259,7 @@ int Consumer_Handler::init (int argc, ACE_TCHAR** argv)
     }
     else
     {
-      if (this->ior_ == nullptr)
+      if (this->ior_.empty ())
       {
         ACE_ERROR_RETURN ((LM_ERROR, "%s: no ior specified\n", this->argv_[0]), -1);
       }
@@ -276,7 +268,7 @@ int Consumer_Handler::init (int argc, ACE_TCHAR** argv)
 
       if (server_object == nullptr)
       {
-        ACE_ERROR_RETURN ((LM_ERROR, "invalid ior <%s>\n", this->ior_), -1);
+        ACE_ERROR_RETURN ((LM_ERROR, "invalid ior <%s>\n", this->ior_.c_str ()), -1);
       }
 
       // The downcasting from CORBA::Object to Notifier is done using the <narrow> method.

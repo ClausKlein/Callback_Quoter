@@ -15,11 +15,12 @@
 
 #include "ace/Get_Opt.h"
 #include "ace/OS_NS_ctype.h"
-#include "ace/OS_NS_unistd.h"
+
+#include <fstream>
 
 // Constructor.
 Notifier_Input_Handler::Notifier_Input_Handler ()
-  : ior_output_file_ (0)
+  : ior_output_file_ ()
   , argc_ (0)
   , argv_ (0)
   , using_naming_service_ (1)
@@ -117,11 +118,7 @@ int Notifier_Input_Handler::parse_args ()
         break;
 
       case 'f': // output the IOR toi a file.
-        this->ior_output_file_ = ACE_OS::fopen (get_opts.opt_arg (), "w");
-        if (this->ior_output_file_ == 0)
-        {
-          ACE_ERROR_RETURN ((LM_ERROR, "Unable to open %s for writing: %p\n", get_opts.opt_arg ()), -1);
-        }
+        this->ior_output_file_ = get_opts.opt_arg ();
         break;
 
       case 's': // don't use the naming service
@@ -129,7 +126,7 @@ int Notifier_Input_Handler::parse_args ()
         break;
 
       case '?': // display help for use of the server.
-      default:
+                // TODO: TBD default:
         ACE_ERROR_RETURN ((LM_ERROR,
                            "usage:  %s"
                            " [-d]"
@@ -146,9 +143,8 @@ int Notifier_Input_Handler::parse_args ()
 }
 
 // Initialize the server.
-int Notifier_Input_Handler::init (int argc, ACE_TCHAR* argv[])
+int Notifier_Input_Handler::init (int argc, char* argv[])
 {
-
   this->argc_ = argc;
   this->argv_ = argv;
 
@@ -158,7 +154,7 @@ int Notifier_Input_Handler::init (int argc, ACE_TCHAR* argv[])
   if (orb == nullptr)
   {
     taox11_error << "ERROR: CORBA::ORB_init (argc, argv) returned null ORB." << std::endl;
-    return 1;
+    return -1;
   }
 
   // Get reference to Root POA.
@@ -167,7 +163,7 @@ int Notifier_Input_Handler::init (int argc, ACE_TCHAR* argv[])
   if (!obj)
   {
     taox11_error << "ERROR: resolve_initial_references (\"RootPOA\") returned null reference." << std::endl;
-    return 1;
+    return -1;
   }
 
   taox11_info << "retrieved RootPOA object reference" << std::endl;
@@ -176,7 +172,7 @@ int Notifier_Input_Handler::init (int argc, ACE_TCHAR* argv[])
   if (!root_poa)
   {
     taox11_error << "ERROR: IDL::traits<PortableServer::POA>::narrow (obj) returned null object." << std::endl;
-    return 1;
+    return -1;
   }
 
   taox11_info << "narrowed POA interface" << std::endl;
@@ -185,23 +181,23 @@ int Notifier_Input_Handler::init (int argc, ACE_TCHAR* argv[])
   if (!poaman)
   {
     taox11_error << "ERROR: root_poa->the_POAManager () returned null object." << std::endl;
-    return 1;
+    return -1;
   }
 
-  // FIXME: error: no viable conversion from 'taox11::CORBA::object_reference<Notifier>' to 'taox11::CORBA::servant_traits<
-  //::taox11::PortableServer::Servant>::ref_type' (aka 'servant_reference<PortableServer::Servant>')
-  CORBA::servant_traits<Notifier>::ref_type notifier_impl; // TODO = CORBA::make_reference<Notifier> (orb);
+  // CORBA::servant_traits<Notifier>::ref_type
+  auto notifier_impl = CORBA::make_reference<Notifier_i> (orb);
   taox11_info << "created Notifier servant" << std::endl;
 
   // PortableServer::ObjectId
   auto id = root_poa->activate_object (notifier_impl);
   taox11_info << "activated Notifier servant" << std::endl;
 
-  IDL::traits<CORBA::Object>::ref_type notifier_obj = root_poa->id_to_reference (id);
+  // IDL::traits<CORBA::Object>::ref_type
+  auto notifier_obj = root_poa->id_to_reference (id);
   if (notifier_obj == nullptr)
   {
     taox11_error << "ERROR: root_poa->id_to_reference (id) returned null reference." << std::endl;
-    return 1;
+    return -1;
   }
 
   // IDL::traits<Notifier>::ref_type
@@ -209,12 +205,13 @@ int Notifier_Input_Handler::init (int argc, ACE_TCHAR* argv[])
   if (notifier == nullptr)
   {
     taox11_error << "ERROR: IDL::traits<Notifier>::narrow (notifier_obj) returned null reference." << std::endl;
-    return 1;
+    return -1;
   }
 
   // Activate the servant in the POA.
   poaman->activate ();
-  std::string str = orb->object_to_string (notifier);
+
+  std::string ior = orb->object_to_string (notifier);
 
 #else
 
@@ -232,9 +229,10 @@ int Notifier_Input_Handler::init (int argc, ACE_TCHAR* argv[])
     ACE_ERROR_RETURN ((LM_ERROR, "%p\n", "register_stdin_handler"), -1);
   }
 
-  auto str = this->orb_manager_.activate_under_child_poa ("Notifier", &this->notifier_i_);
+  auto ior = this->orb_manager_.activate_under_child_poa ("Notifier", &this->notifier_i_);
 #endif
 
+  // TODO TBD: still needed? CK
   // Stash our ORB pointer for later reference.
   this->notifier_i_.orb (orb);
 
@@ -244,17 +242,24 @@ int Notifier_Input_Handler::init (int argc, ACE_TCHAR* argv[])
     return retval;
   }
 
-  taox11_debug << "The IOR is: " << str << std::endl;
-  if (this->ior_output_file_)
+  taox11_debug << "The IOR is: " << ior << std::endl;
+
+  // Output the IOR to the ior_output_file
+  std::ofstream fos (this->ior_output_file_);
+  if (!fos)
   {
-    ACE_OS::fprintf (this->ior_output_file_, "%s", str.c_str ());
-    ACE_OS::fclose (this->ior_output_file_);
+    taox11_error << "ERROR: failed to open file: " << this->ior_output_file_ << std ::endl;
+    return -1;
   }
+
+  fos << ior;
+  fos.close ();
 
   if (this->using_naming_service_)
   {
     return this->init_naming_service ();
   }
+
   return 0;
 }
 

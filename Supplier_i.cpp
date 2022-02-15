@@ -13,19 +13,15 @@
 #include "Naming_Client.h"
 
 #include "ace/Get_Opt.h"
-#include "ace/OS_NS_fcntl.h"
-#include "ace/OS_NS_stdio.h"
-#include "ace/OS_NS_string.h"
-#include "ace/OS_NS_unistd.h"
-#include "ace/Reactor.h"
-#include "ace/Read_Buffer.h"
+
+#include <fstream>
 
 // Constructor.
 Supplier::Supplier ()
   : supplier_timer_handler_ (nullptr)
   , argc_ (0)
   , argv_ (nullptr)
-  , ior_ (nullptr)
+  , ior_ ()
   , use_naming_service_ (1)
   , notifier_ ()
   , f_ptr_ (nullptr)
@@ -37,9 +33,6 @@ Supplier::Supplier ()
 
 Supplier::~Supplier ()
 {
-  // Release the memory allocated for ior_.
-  ACE_OS::free (this->ior_);
-
   // Close the stream.
   ACE_OS::fclose (f_ptr_);
 
@@ -47,28 +40,18 @@ Supplier::~Supplier ()
 }
 
 // Reads the Server factory IOR from a file.
-int Supplier::read_ior (ACE_TCHAR* filename)
+int Supplier::read_ior (const std::string& filename)
 {
   // Open the file for reading.
-  ACE_HANDLE f_handle = ACE_OS::open (filename, 0);
-
-  if (f_handle == ACE_INVALID_HANDLE)
+  std::ifstream fis (filename);
+  if (!fis)
   {
-    ACE_ERROR_RETURN ((LM_ERROR, "Unable to open %s for reading\n", filename), -1);
+    taox11_error << "ERROR: failed to open file: " << filename << std ::endl;
+    return -1;
   }
 
-  ACE_Read_Buffer ior_buffer (f_handle);
-  char* data = ior_buffer.read ();
-
-  if (data == nullptr)
-  {
-    ACE_ERROR_RETURN ((LM_ERROR, "Unable to read ior\n"), -1);
-  }
-
-  this->ior_ = ACE_OS::strdup (ACE_TEXT_CHAR_TO_TCHAR (data));
-  ior_buffer.alloc ()->free (data);
-
-  ACE_OS::close (f_handle);
+  std::getline (fis, this->ior_);
+  fis.close ();
 
   return 0;
 }
@@ -101,8 +84,8 @@ int Supplier::parse_args ()
         }
         break;
 
-      case 'k': // Ior provide on command line
-        this->ior_ = ACE_OS::strdup (get_opts.opt_arg ());
+      case 'k': // IOR provide on command line
+        this->ior_ = get_opts.opt_arg ();
         break;
 
       case 'f': // Read the IOR from the file.
@@ -160,14 +143,14 @@ int Supplier::send_market_status (const char* stock_name, int32_t value)
 }
 
 // Execute client example code.
-int Supplier::run ()
+int Supplier::run () const
 {
   long timer_id = 0;
 
   taox11_debug << "Market Status Supplier Daemon is running..." << std::endl;
 
   // This sets the period for the stock-feed.
-  ACE_Time_Value period (period_value_);
+  ACE_Time_Value period (this->period_value_);
 
   // "Your time starts now!" ;) the timer is scheduled to begin work.
   timer_id = reactor_used ()->schedule_timer (supplier_timer_handler_, "Periodic stockfeed", period, period);
@@ -219,7 +202,7 @@ int Supplier::via_naming_service ()
                         -1);
     CosNaming::Name notifier_ref_name (1);
     notifier_ref_name.length (1);
-    notifier_ref_name[0].id = CORBA::string_dup ("Notifier");
+    notifier_ref_name[0].id = "Notifier";
 
     IDL::traits<CORBA::Object>::ref_type notifier_obj = this->naming_services_client_->resolve (notifier_ref_name);
 
@@ -242,7 +225,7 @@ int Supplier::via_naming_service ()
 }
 
 // Init function.
-int Supplier::init (int argc, ACE_TCHAR** argv)
+int Supplier::init (int argc, char** argv)
 {
   this->argc_ = argc;
   this->argv_ = argv;
@@ -266,7 +249,7 @@ int Supplier::init (int argc, ACE_TCHAR** argv)
       return via_naming_service ();
     }
 
-    if (this->ior_ == nullptr)
+    if (this->ior_.empty ())
     {
       ACE_ERROR_RETURN ((LM_ERROR, "%s: no ior specified\n", this->argv_[0]), -1);
     }
@@ -274,7 +257,7 @@ int Supplier::init (int argc, ACE_TCHAR** argv)
 
     if (notifier_object == nullptr)
     {
-      ACE_ERROR_RETURN ((LM_ERROR, "invalid ior <%s>\n", this->ior_), -1);
+      ACE_ERROR_RETURN ((LM_ERROR, "invalid ior <%s>\n", this->ior_.c_str ()), -1);
     }
 
     // The downcasting from CORBA::Object to Notifier is done using the <narrow> method.
@@ -300,7 +283,7 @@ ACE_Reactor* Supplier::reactor_used ()
 }
 
 // The stock market information is read from a file.
-int Supplier::read_file (ACE_TCHAR* filename)
+int Supplier::read_file (char* filename)
 {
   f_ptr_ = ACE_OS::fopen (filename, "r");
 
@@ -311,5 +294,6 @@ int Supplier::read_file (ACE_TCHAR* filename)
   {
     ACE_ERROR_RETURN ((LM_ERROR, "Unable to open %s for writing: %p\n", filename), -1);
   }
+
   return 0;
 }

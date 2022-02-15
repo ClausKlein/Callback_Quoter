@@ -48,7 +48,7 @@ public:
   ~Consumer_Handler ();
 
   /// Initialize the client communication with the server.
-  int init (int argc, ACE_TCHAR* argv[]);
+  int init (int argc, char* argv[]);
 
   /// Start the ORB object.
   int run ();
@@ -84,7 +84,7 @@ private:
   IDL::traits<CORBA::ORB>::ref_type orb_;
 
   /// Function to read the server IOR from a file.
-  int read_ior (ACE_TCHAR* filename);
+  int read_ior (const std::string& filename);
 
   /// Parse the command line arguments.  Returns 0 on success, -1 on
   /// error.
@@ -98,10 +98,10 @@ private:
   int argc_;
 
   /// arguments from command line.
-  ACE_TCHAR** argv_;
+  char** argv_;
 
   /// IOR of the obj ref of the server.
-  ACE_TCHAR* ior_;
+  std::string ior_;
 
   /// Flag for server shutdown.
   int shutdown_;

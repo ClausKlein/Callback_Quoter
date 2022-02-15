@@ -31,11 +31,12 @@
  * The implementation of the Notifier class, which is the servant
  * object for the callback quoter server.
  */
-class Notifier_i : public POA::Notifier
+class Notifier_i final : public virtual CORBA::servant_traits<Notifier>::base_type // FIXME: TBD public POA::Notifier
 {
 public:
   /// Constructor.
-  Notifier_i ();
+  Notifier_i (IDL::traits<CORBA::ORB>::ref_type orb);
+  Notifier_i () = default;
 
   /// Destructor.
   ~Notifier_i () = default;
@@ -95,7 +96,7 @@ private:
 
   /// This marks the exit of the notifier. This should be taken care of
   /// before the consumer tries to unregister after the notifier quits.
-  int notifier_exited_;
+  int notifier_exited_{ 0 };
 };
 
 #endif /* NOTIFIER_I_H */

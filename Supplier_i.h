@@ -42,11 +42,11 @@ public:
   /// Destructor.
   ~Supplier ();
 
-  /// Execute  the daemon.
-  int run ();
+  /// Execute the daemon.
+  int run () const;
 
   /// Initialize the client communication endpoint with Notifier.
-  int init (int argc, ACE_TCHAR* argv[]);
+  int init (int argc, char* argv[]);
 
   /// Sends the stock name and its value.
   int send_market_status (const char* stock_name, int32_t value);
@@ -60,7 +60,7 @@ private:
   IDL::traits<CORBA::ORB>::ref_type orb_;
 
   /// Function to read the Notifier IOR from a file.
-  int read_ior (ACE_TCHAR* filename);
+  int read_ior (const std::string& filename);
 
   /// Parses the arguments passed on the command line.
   int parse_args ();
@@ -73,16 +73,16 @@ private:
   static ACE_Reactor* reactor_used ();
 
   /// This method used for getting stock information from a file.
-  int read_file (ACE_TCHAR* filename);
+  int read_file (char* filename);
 
   /// # of arguments on the command line.
   int argc_;
 
   /// arguments from command line.
-  ACE_TCHAR** argv_;
+  char** argv_;
 
   /// IOR of the obj ref of the Notifier.
-  ACE_TCHAR* ior_;
+  std::string ior_;
 
   /// An instance of the name client used for resolving the factory
   /// objects.

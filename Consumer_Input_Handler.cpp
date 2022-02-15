@@ -11,7 +11,6 @@
 #include "Consumer_Input_Handler.h"
 
 #include "ace/OS_NS_ctype.h"
-#include "ace/OS_NS_unistd.h"
 #include "ace/Read_Buffer.h"
 
 Consumer_Input_Handler::Consumer_Input_Handler (Consumer_Handler* consumer_handler)

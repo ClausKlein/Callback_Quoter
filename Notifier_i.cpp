@@ -14,8 +14,8 @@
 
 #include "tao/x11/log.h"
 
-Notifier_i::Notifier_i ()
-  : notifier_exited_ (0)
+Notifier_i::Notifier_i (IDL::traits<CORBA::ORB>::ref_type orb)
+  : orb_ (orb)
 {
   // No-op
 }
