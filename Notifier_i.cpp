@@ -117,12 +117,15 @@ void Notifier_i::market_status (const std::string& stock_name, int32_t stock_val
   taox11_debug << "Notifier_i::market_status: The stockname is " << stock_name << " with price " << stock_value
                << std::endl;
 
+  // XXX CONSUMER_MAP::iterator consumers = this->consumer_map_.find (stock_name);
   auto consumers = this->consumer_map_.find (stock_name);
   if (consumers != this->consumer_map_.end ())
   {
     // Go through the list of <Consumer_Data> to find which registered client wants to be notified.
 
-    for (auto& item : consumers->second)
+    // XXX for (Consumer_Data& item : this->consumer_map_[stock_name])
+    // NOT possible! CK (aka 'const Notifier_i::Consumer_Data') drops 'const' qualifier
+    for (auto item : consumers->second)
     {
       // Check whether the stockname is equal before proceeding further.
       if (stock_value >= item.desired_value_)

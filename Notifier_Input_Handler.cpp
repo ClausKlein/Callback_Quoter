@@ -190,7 +190,7 @@ int Notifier_Input_Handler::init (int argc, ACE_TCHAR* argv[])
 
   // FIXME: error: no viable conversion from 'taox11::CORBA::object_reference<Notifier>' to 'taox11::CORBA::servant_traits<
   //::taox11::PortableServer::Servant>::ref_type' (aka 'servant_reference<PortableServer::Servant>')
-  CORBA::servant_traits<Notifier>::ref_type notifier_impl = CORBA::make_reference<Notifier> (orb);
+  CORBA::servant_traits<Notifier>::ref_type notifier_impl; // TODO = CORBA::make_reference<Notifier> (orb);
   taox11_info << "created Notifier servant" << std::endl;
 
   // PortableServer::ObjectId
@@ -214,7 +214,7 @@ int Notifier_Input_Handler::init (int argc, ACE_TCHAR* argv[])
 
   // Activate the servant in the POA.
   poaman->activate ();
-  std::string ior = orb->object_to_string (notifier);
+  std::string str = orb->object_to_string (notifier);
 
 #else
 

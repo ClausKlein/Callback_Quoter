@@ -22,7 +22,10 @@
 
 // Constructor.
 Supplier::Supplier ()
-  : ior_ (nullptr)
+  : supplier_timer_handler_ (nullptr)
+  , argc_ (0)
+  , argv_ (nullptr)
+  , ior_ (nullptr)
   , use_naming_service_ (1)
   , notifier_ ()
   , f_ptr_ (nullptr)

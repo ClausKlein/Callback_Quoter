@@ -18,7 +18,7 @@ Consumer_i::Consumer_i ()
   : quit_ (0)
 {}
 
-void Consumer_i::push (const Callback_Quoter::Info& data) const
+void Consumer_i::push (const Callback_Quoter::Info& data)
 {
   // On getting the needed information you now proceed to the next step, which could be obtaining the shares.
 
