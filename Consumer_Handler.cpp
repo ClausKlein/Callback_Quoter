@@ -59,10 +59,16 @@ Consumer_Handler::~Consumer_Handler ()
     {
       ACE_ERROR ((LM_ERROR, "%p\n", "remove_stdin_handler"));
     }
+#else
+    taox11_error << "remove_stdin_handler failed" << std::endl;
 #endif
 
-    taox11_error << "remove_stdin_handler failed" << std::endl;
+    // TODO: TBD delete this->consumer_signal_handler_;
+    // TODO: TBD delete this->consumer_input_handler_;
   }
+
+  // TODO: check this! CK
+  delete this->consumer_servant_;
 }
 
 // Reads the Server factory IOR from a file.

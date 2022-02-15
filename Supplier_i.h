@@ -22,15 +22,13 @@
 #include "Supplier_Timer_Handler.h"
 
 #include "ace/Reactor.h"
-#include "ace/Read_Buffer.h"
 
 /**
  * @class Supplier
  *
  * @brief Market feed  daemon implementation.
  *
- * This class feeds stock information to the Callback Quoter
- * notifier.
+ * This class feeds stock information to the Callback Quoter notifier.
  */
 class Supplier_Timer_Handler;
 class Supplier

@@ -19,17 +19,18 @@
 
 #include "ConsumerC.h"
 #include "ConsumerS.h"
-#include "NotifierS.h"
+#include "NotifierC.h"
 
 /**
  * @class Consumer_i
  *
  * @brief Consumer object implementation.
  *
- * This class has methods that are called by the callback quoter
- * server.
+ * This class has methods that are called by the callback quoter server.
  */
-class Consumer_i : public Callback_Quoter::POA::Consumer
+class Consumer_i final
+  : public virtual CORBA::servant_traits<Callback_Quoter::Consumer>::base_type // FIXME: TBD : public
+                                                                               // Callback_Quoter::POA::Consumer
 {
 public:
   /// Constructor.

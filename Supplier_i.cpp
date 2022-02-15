@@ -13,6 +13,7 @@
 #include "Naming_Client.h"
 
 #include "ace/Get_Opt.h"
+#include "ace/Read_Buffer.h"
 
 #include <fstream>
 
@@ -34,7 +35,9 @@ Supplier::Supplier ()
 Supplier::~Supplier ()
 {
   // Close the stream.
-  ACE_OS::fclose (f_ptr_);
+  ACE_OS::fclose (this->f_ptr_);
+
+  // TODO: TBD delete this->supplier_timer_handler_;
 
   taox11_debug << "Market Status Supplier Daemon exiting!" << std::endl;
 }
@@ -153,7 +156,7 @@ int Supplier::run () const
   ACE_Time_Value period (this->period_value_);
 
   // "Your time starts now!" ;) the timer is scheduled to begin work.
-  timer_id = reactor_used ()->schedule_timer (supplier_timer_handler_, "Periodic stockfeed", period, period);
+  timer_id = reactor_used ()->schedule_timer (this->supplier_timer_handler_, "Periodic stockfeed", period, period);
   if (timer_id == -1)
   {
     ACE_ERROR_RETURN ((LM_ERROR, "%p\n", "schedule_timer"), -1);
@@ -242,7 +245,7 @@ int Supplier::init (int argc, char** argv)
     }
 
     // Create the Timer_Handler.
-    ACE_NEW_RETURN (supplier_timer_handler_, Supplier_Timer_Handler (this, reactor_used (), this->f_ptr_), -1);
+    ACE_NEW_RETURN (this->supplier_timer_handler_, Supplier_Timer_Handler (this, reactor_used (), this->f_ptr_), -1);
 
     if (this->use_naming_service_)
     {
@@ -285,12 +288,12 @@ ACE_Reactor* Supplier::reactor_used ()
 // The stock market information is read from a file.
 int Supplier::read_file (char* filename)
 {
-  f_ptr_ = ACE_OS::fopen (filename, "r");
+  this->f_ptr_ = ACE_OS::fopen (filename, "r");
 
   taox11_debug << "filename = " << filename << std::endl;
 
   // the stock values are to be read from a file.
-  if (f_ptr_ == nullptr)
+  if (this->f_ptr_ == nullptr)
   {
     ACE_ERROR_RETURN ((LM_ERROR, "Unable to open %s for writing: %p\n", filename), -1);
   }

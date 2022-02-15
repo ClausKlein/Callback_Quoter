@@ -28,8 +28,7 @@
  *
  * @brief Notifier servant class.
  *
- * The implementation of the Notifier class, which is the servant
- * object for the callback quoter server.
+ * The implementation of the Notifier class, which is the servant object for the callback quoter server.
  */
 class Notifier_i final : public virtual CORBA::servant_traits<Notifier>::base_type // FIXME: TBD public POA::Notifier
 {

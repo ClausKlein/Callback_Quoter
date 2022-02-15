@@ -1,9 +1,8 @@
 
 
-******************************************************************************
-CALLBACK QUOTER TEST EXAMPLE                           -- Kirthika Parameswaran
-                                                          <kirthika@cs.wustl.edu>
-******************************************************************************
+==============================================================================
+CALLBACK QUOTER TEST EXAMPLE                          -- Kirthika Parameswaran
+==============================================================================
 
 This is an distributed application which highlights the importance
 of the callback feature in helping meet the demands of various clients
@@ -17,7 +16,7 @@ There are three parts to the Callback Quoter Example.
 
 
 In detail:
-_________
+==========
 
 1) Supplier
 --is the market feed daemon who keeps feeding the current stock
@@ -42,10 +41,10 @@ This is the callback feature in this example.
 
 
 Running the application:
-________________________
+========================
 
 CASE I: USing the Naming Service
-================================
+--------------------------------
 
 a) Non-interactive
 
@@ -53,17 +52,18 @@ a) Non-interactive
 
 b) Interactive
 
-There are 3  parts to it:
+There are 3 parts to it:
+________________________
 
-1) shell 1: type at the command prompt:
+1) shell 1: type at the command prompt::
 
-./notifier
+    ./notifier
 
 
 
-2) shell 2: type at the command prompt:
+2) shell 2: type at the command prompt::
 
-./consumer
+    ./consumer
 
 register yourself with 'r'
 Enter the stockname and value.
@@ -73,32 +73,31 @@ You can  unregister by typing 'u' and quit by typing 'q'.
 
 
 
-3) shell 3: type at the command prompt:
+3) shell 3: type at the command prompt::
 
-./supplier -ifilename
+    ./supplier -i example.stocks
 
 The -i option simply tells the daemon where to pick information from.
-TIP:: the contents of the input file per line should be: stockname and its price.
-      Sample: ./example.stocks
+TIP:: the contents of the input file per line should be: stockname and its price. Sample: ./example.stocks
 
 The other option includes setting the period for the stock feed.
 
-----------------------------------------------------------------------------
 
-CASE II: Without using the Naming Service.
-=========================================
+CASE II: Without using the Naming Service
+-----------------------------------------
 
-There are 3  parts to it:
+There are 3 parts to it:
+________________________
 
-1) shell 1: type at the command prompt:
+1) shell 1: type at the command prompt::
 
-./notifier -fior_file -s
+    ./notifier -f notifier.ior -s -ORBDebugLevel 1
 
 
 
-2) shell 2: type at the command prompt:
+2) shell 2: type at the command prompt::
 
-./consumer -fior_file -s
+    ./consumer -f notifier.ior -s -a TAO -t 10 -ORBDebugLevel 1
 
 register yourself with 'r'
 Enter the stockname and value.
@@ -108,13 +107,12 @@ You can  unregister by typing 'u' and quit by typing 'q'.
 
 
 
-3) shell 3: type at the command prompt:
+3) shell 3: type at the command prompt::
 
-./supplier -ifilename -fior_file -s
+    ./supplier -i example.stocks -f notifier.ior -s -ORBDebugLevel 1
 
 The -i option simply tells the daemon where to pick information from.
-TIP:: the contents of the input file per line should be: stockname and its price.
-      Sample: ./example.stocks
+TIP:: the contents of the input file per line should be: stockname and its price.  Sample: ./example.stocks
 
 The other option includes setting the period for the stock feed.
 

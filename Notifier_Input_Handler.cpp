@@ -124,7 +124,7 @@ int Notifier_Input_Handler::parse_args ()
         // XXX TAO_debug_level++; ///*****
         break;
 
-      case 'f': // output the IOR toi a file.
+      case 'f': // output the IOR to a file.
         this->ior_output_file_ = get_opts.opt_arg ();
         break;
 
@@ -133,7 +133,7 @@ int Notifier_Input_Handler::parse_args ()
         break;
 
       case '?': // display help for use of the server.
-                // TODO: TBD default:
+      default:
         ACE_ERROR_RETURN ((LM_ERROR,
                            "usage:  %s"
                            " [-d]"
@@ -157,7 +157,7 @@ int Notifier_Input_Handler::init (int argc, char* argv[])
 
 #if 1
   // IDL::traits<CORBA::ORB>::ref_type
-  auto orb = CORBA::ORB_init (argc, argv);
+  auto orb = CORBA::ORB_init (this->argc_, this->argv_);
   if (orb == nullptr)
   {
     taox11_error << "ERROR: CORBA::ORB_init (argc, argv) returned null ORB." << std::endl;
