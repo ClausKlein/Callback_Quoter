@@ -11,6 +11,7 @@
 .*~
 .depend.*
 /consumer
+/generated/
 /notifier
 /supplier
 GNUmakefile*
