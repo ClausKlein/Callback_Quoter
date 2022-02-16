@@ -5,7 +5,7 @@
  *  @file    Consumer_Input_Handler.h
  *
  *  Definition of the Callback_Qouter Consumer Client class,
- * Consumer_Input_Handler.
+ *  Consumer_Input_Handler.
  *
  *  @author Kirthika Parameswaran <kirthika@cs.wustl.edu>
  */
@@ -23,9 +23,8 @@
 #include "ace/Event_Handler.h"
 #include "ace/Reactor.h"
 
-// Creating a class to handle input events.
-// Since only inputs need to be handled, only the handle_input
-// method is overlaoded.
+// Creating a class to handle input events.  Since only inputs need to be handled, only the handle_input method is
+// overlaoded.
 
 class Consumer_Handler;
 
@@ -48,6 +47,14 @@ public:
   /// Handle the user input.
   int handle_input (ACE_HANDLE) override;
 
+  /**
+   * For removal of the signal handler from the dispatch tables.  When
+   * the handle_signal () returns < 0 this method will be executed
+   * automatically.
+   */
+  int handle_close (ACE_HANDLE handle, ACE_Reactor_Mask close_mask) override;
+
+protected:
   /// Registration with the notifier.
   int register_consumer ();
 
@@ -63,25 +70,22 @@ public:
     //   A set of values for the execution of the consumer.
     //
     // = DESCRIPTION
-    //   Used so that the process of registering, unregistering
-    //   and exiting neednt be dependent on 'r' 'u' and 'q'.
+    //   Used so that the process of registering, unregistering and exiting neednt be dependent on 'r' 'u' and 'q'.
     //   Also, #define clutters up the global namespace.
 
     REGISTER = 'r',
-    // The character that the user must type to register the consumer with
-    // the Notifier_server.
+    // The character that the user must type to register the consumer with the Notifier_server.
 
     UNREGISTER = 'u',
-    // The character that the user must type to unregister the consumer with
-    // the Notifier_server.
+    // The character that the user must type to unregister the consumer with the Notifier_server.
 
     EXIT = 'q'
-    // The character the user must type to quit the consumer client
-    // application.
+    // The character the user must type to quit the consumer client application.
   };
 
 protected:
-  /// the destructor.
+  /// Protected destructor so that the input handler is always created
+  /// dynamically and hence the heap doesnt get corrupted.
   ~Consumer_Input_Handler () = default;
 
 private:

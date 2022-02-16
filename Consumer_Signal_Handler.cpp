@@ -52,7 +52,7 @@ int Consumer_Signal_Handler::quit_on_signal ()
   }
   catch (const CORBA::Exception& ex)
   {
-    taox11_error << "Consumer_Input_Handler::quit_consumer_signal()" << ex << std::endl;
+    taox11_error << "Consumer_Input_Handler::quit_on_signal()" << ex << std::endl;
     return -1;
   }
 

@@ -104,7 +104,7 @@ private:
   std::string ior_;
 
   /// Flag for server shutdown.
-  int shutdown_;
+  // UNUSED int shutdown_;
 
   /// An instance of the name client used for resolving the factory
   /// objects.

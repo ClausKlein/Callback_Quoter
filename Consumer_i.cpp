@@ -14,9 +14,11 @@
 
 #include "tao/x11/log.h"
 
-Consumer_i::Consumer_i ()
+Consumer_i::Consumer_i (IDL::traits<CORBA::ORB>::ref_type orb)
   : quit_ (0)
-{}
+{
+  this->orb_ = std::move (orb);
+}
 
 void Consumer_i::push (const Callback_Quoter::Info& data)
 {
@@ -33,11 +35,4 @@ void Consumer_i::shutdown ()
 
   this->orb_->shutdown ();
   quit_ = 1;
-}
-
-void Consumer_i::orb (IDL::traits<CORBA::ORB>::ref_type o)
-{
-  // Makes a copy of the ORB pointer.
-
-  this->orb_ = std::move (o);
 }

@@ -17,7 +17,6 @@
 #  pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include "ConsumerC.h"
 #include "ConsumerS.h"
 #include "NotifierC.h"
 
@@ -28,13 +27,11 @@
  *
  * This class has methods that are called by the callback quoter server.
  */
-class Consumer_i final
-  : public virtual CORBA::servant_traits<Callback_Quoter::Consumer>::base_type // FIXME: TBD : public
-                                                                               // Callback_Quoter::POA::Consumer
+class Consumer_i final : public virtual CORBA::servant_traits<Callback_Quoter::Consumer>::base_type
 {
 public:
   /// Constructor.
-  Consumer_i ();
+  Consumer_i (IDL::traits<CORBA::ORB>::ref_type orb);
 
   /// Destructor.
   ~Consumer_i () = default;
@@ -44,9 +41,6 @@ public:
 
   /// Used to get the consumer to shut down.
   void shutdown () override;
-
-  /// Set the ORB pointer.
-  void orb (IDL::traits<CORBA::ORB>::ref_type o);
 
 private:
   /// ORB pointer.

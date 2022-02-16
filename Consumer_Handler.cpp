@@ -41,7 +41,7 @@ Consumer_Handler::Consumer_Handler ()
   , argc_ (0)
   , argv_ (nullptr)
   , ior_ ()
-  , shutdown_ (0)
+  // UNUSED , shutdown_ (0)
   , use_naming_service_ (1)
   , consumer_input_handler_ (nullptr)
   , consumer_signal_handler_ (nullptr)
@@ -54,6 +54,7 @@ Consumer_Handler::~Consumer_Handler ()
   {
     // Make sure to cleanup the STDIN handler.
 
+    // FIXME: this does not compile! CK
 #ifdef USE_ORB_PROXY
     if (ACE_Event_Handler::remove_stdin_handler (reactor_used (), this->orb_->proxy ().orb_core ()->thr_mgr ()) == -1)
     {
@@ -63,8 +64,10 @@ Consumer_Handler::~Consumer_Handler ()
     taox11_error << "remove_stdin_handler failed" << std::endl;
 #endif
 
-    // TODO: TBD delete this->consumer_signal_handler_;
-    // TODO: TBD delete this->consumer_input_handler_;
+    // see Consumer_Signal_Handler::handle_close()
+    // NOTE: not needed to delete this->consumer_signal_handler_;
+    // see Consumer_Input_Handler::handle_close()
+    // NOTE: not needed to delete this->consumer_input_handler_;
   }
 
   // TODO: check this! CK
@@ -91,7 +94,7 @@ int Consumer_Handler::read_ior (const std::string& filename)
 // Parses the command line arguments and returns an error status.
 int Consumer_Handler::parse_args ()
 {
-  ACE_Get_Opt get_opts (argc_, argv_, ACE_TEXT ("a:t:d:f:xk:xs"));
+  ACE_Get_Opt get_opts (argc_, argv_, ACE_TEXT ("a:t:d:f:k:s"));
   int c;
   int result;
 
@@ -128,9 +131,7 @@ int Consumer_Handler::parse_args ()
         this->threshold_value_ = ACE_OS::atoi (get_opts.opt_arg ());
         break;
 
-      case 'x':
-        this->shutdown_ = 1;
-        break;
+        // UNUSED case 'x': this->shutdown_ = 1; break;
 
       case '?':
       default:
@@ -139,7 +140,7 @@ int Consumer_Handler::parse_args ()
                            " [-d]"
                            " [-f ior-file]"
                            " [-k ior]"
-                           " [-x]"
+                           // UNUSED [-x]"
                            " [-s]"
                            " [-a stock_name]"
                            " [-t threshold]"
@@ -238,6 +239,7 @@ int Consumer_Handler::init (int argc, char** argv)
 
       ACE_NEW_RETURN (consumer_input_handler_, Consumer_Input_Handler (this), -1);
 
+      // FIXME: this does not compile! CK
 #ifdef USE_ORB_PROXY
       if (ACE_Event_Handler::register_stdin_handler (
             consumer_input_handler_, reactor_used (), this->orb_->proxy ().orb_core ()->thr_mgr ()) == -1)
@@ -296,18 +298,18 @@ int Consumer_Handler::run ()
   {
     // Obtain and activate the RootPOA.
     IDL::traits<CORBA::Object>::ref_type obj = this->orb_->resolve_initial_references ("RootPOA");
-
     IDL::traits<PortableServer::POA>::ref_type root_poa = IDL::traits<PortableServer::POA>::narrow (obj);
-
     IDL::traits<PortableServer::POAManager>::ref_type poa_manager = root_poa->the_POAManager ();
-
     poa_manager->activate ();
 
-    ACE_NEW_RETURN (this->consumer_servant_, Consumer_i (), -1);
-    // Set the orb in the consumer_ object.
-    this->consumer_servant_->orb (this->orb_);
+    // NOTE: this is the old way to create a server with new:
+    // TODO: prevent this, use RAII! CK
+    ACE_NEW_RETURN (this->consumer_servant_, Consumer_i (this->orb_), -1);
 
-    // Get the consumer stub (i.e consumer object) pointer.
+    // Set the orb in the consumer_ object.
+    // DONE this->consumer_servant_->orb (this->orb_);
+
+    // Get the consumer stub (i.e consumer object) reverence.
     this->consumer_var_ = this->consumer_servant_->_this ();
 
     if (this->interactive_ == 0)

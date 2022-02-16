@@ -18,9 +18,18 @@ Consumer_Input_Handler::Consumer_Input_Handler (Consumer_Handler* consumer_handl
   consumer_handler_ = consumer_handler;
 }
 
+// Method called before the Event_Handler dies.
+int Consumer_Input_Handler::handle_close (ACE_HANDLE, ACE_Reactor_Mask)
+{
+  // End of the input handler.
+  delete this;
+
+  return 0;
+}
+
 int Consumer_Input_Handler::handle_input (ACE_HANDLE)
 {
-  char buf[BUFSIZ];
+  char buf[BUFSIZ]{};
 
   // The string could read contains \n\0 hence using ACE_OS::read
   // which returns the no of bytes read and hence i can manipulate
@@ -56,7 +65,7 @@ int Consumer_Input_Handler::handle_input (ACE_HANDLE)
 int Consumer_Input_Handler::register_consumer ()
 {
   // Get the stockname the consumer is interested in.
-  static char stockname[BUFSIZ];
+  char stockname[BUFSIZ]{};
 
   taox11_debug << "Stockname?";
 
