@@ -165,7 +165,11 @@ bool Notifier_i::Consumer_Data::operator== (const Consumer_Data& rhs) const
 {
   // NOTE: this call might not behave well on other ORBs
   // since <_is_equivalent> isn't guaranteed to differentiate object references.
-  return this->consumer_->_is_equivalent (rhs.consumer_);
+
+  // error: passing ‘const Callback_Quoter::Consumer’ as ‘this’ argument discards qualifiers [-fpermissive]
+  // return this->consumer_->_is_equivalent (rhs.consumer_);
+
+  return const_cast<IDL::traits<Callback_Quoter::Consumer>::ref_type&> (this->consumer_)->_is_equivalent (rhs.consumer_);
 }
 
 bool Notifier_i::Consumer_Data::operator< (const Consumer_Data& rhs) const

@@ -19,6 +19,7 @@ In detail:
 ==========
 
 1) Supplier
+
 --is the market feed daemon who keeps feeding the current stock
 information to the Notifier periodically.
 The timer handler has been used in the implementation of the daemon
@@ -26,12 +27,14 @@ process. It reads the current stock value from a file and sends it to
 the Notifier.
 
 2) Notifier
+
 -- On getting information form the supplier, it checks whether there are
 any consumers interested in the information and accordingly sends it to
 them. The consumer object is registered with the notifier and the data
 is pushed to the consumer using this reference.
 
 3) Consumer
+
 -- He is the stock broker interested in the stock values in the market.
 He will make decisions of selling only if the stock he is interested in
 has a price greater than the threshold value he has set for that stock.
@@ -43,14 +46,18 @@ This is the callback feature in this example.
 Running the application:
 ========================
 
-CASE I: USing the Naming Service
+CASE I: Using the Naming Service
 --------------------------------
 
 a) Non-interactive
 
-  SImply execute the ./run_test.pl, ofcourse after you start off the Naming Service.
+  Simply execute the ./run_test.pl
+
 
 b) Interactive
+
+TIP:: Ofcourse after you have started the Naming Service in background!
+
 
 There are 3 parts to it:
 ________________________
@@ -85,6 +92,13 @@ The other option includes setting the period for the stock feed.
 
 CASE II: Without using the Naming Service
 -----------------------------------------
+
+a) Non-interactive
+
+    ./run_test.pl -s -debug 2>&1 | grep -w Selling
+
+
+b) Interactive
 
 There are 3 parts to it:
 ________________________
