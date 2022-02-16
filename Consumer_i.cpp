@@ -15,7 +15,7 @@
 #include "tao/x11/log.h"
 
 Consumer_i::Consumer_i (IDL::traits<CORBA::ORB>::ref_type orb)
-  : quit_ (0)
+// UNUSED : quit_ (0)
 {
   this->orb_ = std::move (orb);
 }
@@ -34,5 +34,5 @@ void Consumer_i::shutdown ()
   taox11_debug << "consumer shutting down" << std::endl;
 
   this->orb_->shutdown ();
-  quit_ = 1;
+  // UNUSED this->quit_ = 1;
 }

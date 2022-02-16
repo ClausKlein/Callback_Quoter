@@ -48,7 +48,7 @@ int Consumer_Signal_Handler::quit_on_signal ()
       this->consumer_handler_->server_->unregister_callback (this->consumer_handler_->consumer_var_);
       taox11_debug << "Consumer Unregistered" << std::endl;
     }
-    this->consumer_handler_->consumer_servant_->shutdown ();
+    this->consumer_handler_->consumer_var_->shutdown ();
   }
   catch (const CORBA::Exception& ex)
   {

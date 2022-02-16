@@ -184,8 +184,8 @@ int Notifier_Input_Handler::init (int argc, char* argv[])
 
   taox11_info << "narrowed POA interface" << std::endl;
   // IDL::traits<PortableServer::POAManager>::ref_type
-  auto poaman = root_poa->the_POAManager ();
-  if (!poaman)
+  auto poa_manager = root_poa->the_POAManager ();
+  if (!poa_manager)
   {
     taox11_error << "ERROR: root_poa->the_POAManager () returned null object." << std::endl;
     return -1;
@@ -216,7 +216,7 @@ int Notifier_Input_Handler::init (int argc, char* argv[])
   }
 
   // Activate the servant in the POA.
-  poaman->activate ();
+  poa_manager->activate ();
 
   std::string ior = orb->object_to_string (notifier);
 
@@ -240,7 +240,7 @@ int Notifier_Input_Handler::init (int argc, char* argv[])
 #endif
 
   // TODO TBD: still needed? CK
-  // Stash our ORB pointer for later reference.
+  // Stash our ORB for later reference.
   this->notifier_i_.orb (orb);
 
   int retval = this->parse_args ();

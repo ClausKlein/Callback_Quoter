@@ -154,7 +154,7 @@ int Consumer_Input_Handler::quit_consumer_process ()
       consumer_handler_->unregistered_ = 0;
       consumer_handler_->registered_ = 0;
     }
-    this->consumer_handler_->consumer_servant_->shutdown ();
+    this->consumer_handler_->consumer_var_->shutdown ();
   }
   catch (const CORBA::Exception& ex)
   {
@@ -164,7 +164,7 @@ int Consumer_Input_Handler::quit_consumer_process ()
 
     try
     {
-      this->consumer_handler_->consumer_servant_->shutdown ();
+      this->consumer_handler_->consumer_var_->shutdown ();
     }
     catch (const CORBA::Exception&)
     {

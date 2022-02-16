@@ -43,15 +43,14 @@ public:
   void shutdown () override;
 
 private:
-  /// ORB pointer.
+  /// ORB used.
   IDL::traits<CORBA::ORB>::ref_type orb_;
 
   /// If 1 denotes that the consumer is dead else alive.
-  int quit_;
+  // UNUSED int quit_;
 
-  // @@ Please rename to Notifier.
   /// Smart pointer to the Notifier object.
-  IDL::traits<Notifier>::ref_type server_;
+  // UNUSED IDL::traits<Notifier>::ref_type notifier_;
 };
 
 #endif /* CONSUMER_I_H  */

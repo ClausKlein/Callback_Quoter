@@ -30,7 +30,7 @@
  *
  * The implementation of the Notifier class, which is the servant object for the callback quoter server.
  */
-class Notifier_i final : public virtual CORBA::servant_traits<Notifier>::base_type // FIXME: TBD public POA::Notifier
+class Notifier_i final : public virtual CORBA::servant_traits<Notifier>::base_type
 {
 public:
   /// Constructor.
@@ -52,10 +52,10 @@ public:
   /// Get the market status.
   void market_status (const std::string& stock_name, int32_t stock_value) override;
 
-  /// Set the orb pointer.
+  /// Set the orb manager.
   void orb (CORBA::ORB::_ref_type orb);
 
-  /// Get the orb pointer.
+  /// Get the orb manager.
   CORBA::ORB::_ref_type orb ();
 
   /// Shutdown the Notifier.
@@ -68,7 +68,7 @@ private:
   /**
    * @class Consumer_Data
    *
-   * @brief Saves the Consumer_var and the threshold stock value.
+   * @brief Saves the Consumer reference and the threshold stock value.
    */
   class Consumer_Data
   {
@@ -89,7 +89,7 @@ private:
   typedef std::unordered_map<std::string, CONSUMERS> CONSUMER_MAP;
 
   /// This is the hash map with each hash_entry consisting of the stockname
-  /// and an unbounded set of consumer object pointer and the desired
+  /// and an unbounded set of consumer object references and the desired
   /// stockvalue.
   CONSUMER_MAP consumer_map_;
 

@@ -90,7 +90,7 @@ void Notifier_i::unregister_callback (IDL::traits<Callback_Quoter::Consumer>::re
   // the map is iterated till the consumer entry to be removed is found and then removed from the map.
 
   // Check to see whether the hash_map still exists. Chances are there that the notifier has exited closing the hash map.
-  if (notifier_exited_ == 1)
+  if (this->notifier_exited_ == 1)
   {
     return;
   }
@@ -153,7 +153,7 @@ void Notifier_i::shutdown ()
 
   // This marks the exit of the notifier. This should be taken care of
   // before the consumer tries to unregister after the notifier quits.
-  notifier_exited_ = 1;
+  this->notifier_exited_ = 1;
 
   taox11_debug << "The Callback Quoter server is shutting down..." << std::endl;
 
@@ -166,9 +166,8 @@ bool Notifier_i::Consumer_Data::operator== (const Consumer_Data& rhs) const
   // NOTE: this call might not behave well on other ORBs
   // since <_is_equivalent> isn't guaranteed to differentiate object references.
 
-  // error: passing ‘const Callback_Quoter::Consumer’ as ‘this’ argument discards qualifiers [-fpermissive]
-  // return this->consumer_->_is_equivalent (rhs.consumer_);
-
+  // g++ error: passing ‘const Callback_Quoter::Consumer’ as ‘this’ argument discards qualifiers [-fpermissive]
+  // XXX return this->consumer_->_is_equivalent (rhs.consumer_);
   return const_cast<IDL::traits<Callback_Quoter::Consumer>::ref_type&> (this->consumer_)->_is_equivalent (rhs.consumer_);
 }
 

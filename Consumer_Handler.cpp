@@ -35,7 +35,7 @@ using namespace TAOX11_NAMESPACE;
 Consumer_Handler::Consumer_Handler ()
   : stock_name_ ("Unknown")
   , threshold_value_ (0)
-  , consumer_servant_ (nullptr)
+  // XXX , consumer_servant_ (nullptr)
   , registered_ (0)
   , unregistered_ (0)
   , argc_ (0)
@@ -71,7 +71,7 @@ Consumer_Handler::~Consumer_Handler ()
   }
 
   // TODO: check this! CK
-  delete this->consumer_servant_;
+  // XXX delete this->consumer_servant_;
 }
 
 // Reads the Server factory IOR from a file.
@@ -186,7 +186,7 @@ int Consumer_Handler::via_naming_service ()
 #else
   try
   {
-    // XXX Initialization of the naming service.
+    // Initialization of the naming service.
     if (this->naming_services_client_.init (orb_) != 0)
       ACE_ERROR_RETURN ((LM_ERROR,
                          " (%P|%t) Unable to initialize "
@@ -303,14 +303,16 @@ int Consumer_Handler::run ()
     poa_manager->activate ();
 
     // NOTE: this is the old way to create a server with new:
-    // TODO: prevent this, use RAII! CK
-    ACE_NEW_RETURN (this->consumer_servant_, Consumer_i (this->orb_), -1);
+    // XXX ACE_NEW_RETURN (this->consumer_servant_, Consumer_i (this->orb_), -1);
 
-    // Set the orb in the consumer_ object.
-    // DONE this->consumer_servant_->orb (this->orb_);
+    // Get the consumer stub (i.e consumer object) reference.
+    // XXX this->consumer_var_ = this->consumer_servant_->_this ();
 
-    // Get the consumer stub (i.e consumer object) reverence.
-    this->consumer_var_ = this->consumer_servant_->_this ();
+    // we use RAII! CK
+    auto consumer_impl = CORBA::make_reference<Consumer_i> (this->orb_);
+    auto object_id = root_poa->activate_object (consumer_impl);
+    auto consumer_obj = root_poa->id_to_reference (object_id);
+    this->consumer_var_ = IDL::traits<Callback_Quoter::Consumer>::narrow (consumer_obj);
 
     if (this->interactive_ == 0)
     {

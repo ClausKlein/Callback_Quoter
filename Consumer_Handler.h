@@ -63,7 +63,7 @@ public:
   IDL::traits<Notifier>::ref_type server_;
 
   /// The consumer object.
-  Consumer_i* consumer_servant_;
+  // XXX Consumer_i* consumer_servant_;
 
   /// Pointer to the consumer object registered with the ORB.
   IDL::traits<Callback_Quoter::Consumer>::ref_type consumer_var_;
