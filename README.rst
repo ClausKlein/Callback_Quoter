@@ -7,10 +7,30 @@ CALLBACK QUOTER taox11 progamming EXAMPLE             -- Kirthika Parameswaran
 This CORBA example is ported to **taox11** and **C++17** by Claus Klein.
 ==============================================================================
 
-To generate the buildfiles type at the command prompt::
+To generate the **makfiles** and **run-clang-tidy** type at the command prompt::
 
   brix11 gen build
+  make Callback_Quoter_IDL
+  make clean
+  bear -- make all
+  run-clang-tidy *_i.cpp *_Handler.cpp notifier.cpp consumer.cpp supplier.cpp
 
+
+**bear:** Generates compilation database for **clang tooling**. see
+
+https://github.com/rizsotto/Bear
+
+Build requirements are:
+
+You have to build **taox11** with **axcioma** on **linux**!
+
+* https://github.com/ClausKlein/axcioma/blob/develop/build-taox11-on-linux.sh
+
+Setup your enviroment with:
+
+* https://github.com/ClausKlein/axcioma/blob/develop/.env_add.sh
+
+-----------------------------------------------------------------------------
 
 This is an distributed application which highlights the importance of the
 **Callback** feature in helping meet the demands of various clients without them
@@ -61,7 +81,9 @@ CASE I: Using the Naming Service
 
 a) Non-interactive
 
-  Simply execute the ./run_test.pl
+  Simply execute::
+
+    ./run_test.pl
 
 
 b) Interactive
@@ -86,7 +108,7 @@ ________________________
   Enter the stockname and value.
   Now wait for information to arrive.
 
-  You can  unregister by typing 'u' and quit by typing 'q'.
+  You can unregister by typing 'u' and quit by typing 'q'.
 
 
 
@@ -105,7 +127,7 @@ ________________________
 CASE II: Without using the Naming Service
 -----------------------------------------
 
-a) Non-interactive
+a) Non-interactive::
 
     ./run_test.pl -s -debug 2>&1 | grep -w Selling
 
@@ -129,7 +151,7 @@ ________________________
   Enter the stockname and value.
   Now wait for information to arrive.
 
-  You can  unregister by typing 'u' and quit by typing 'q'.
+  You can unregister by typing 'u' and quit by typing 'q'.
 
 
 
