@@ -20,25 +20,55 @@ endif()
 
 include(GenerateTaoIdl)
 
-tao_wrap_idl(
-  Consumer.idl
-  Notifier.idl
-)
+tao_wrap_idl(Consumer.idl Notifier.idl)
 
 add_library(idl2cpp ${TAO_IDL_GENERATED})
 target_link_libraries(idl2cpp PUBLIC Axcioma::itaox11)
 set_target_properties(idl2cpp PROPERTIES CXX_STANDARD 17)
 
 if(APPLE) # "think different", indeed
-  target_compile_definitions(idl2cpp PUBLIC __ACE_INLINE__ ACE_HAS_IPV6 ACE_HAS_VERSIONED_NAMESPACE=1 ACE_HAS_CUSTOM_EXPORT_MACROS=0)
+  target_compile_definitions(
+    idl2cpp PUBLIC __ACE_INLINE__ ACE_HAS_IPV6 ACE_HAS_VERSIONED_NAMESPACE=1 ACE_HAS_CUSTOM_EXPORT_MACROS=0
+  )
   target_compile_options(idl2cpp PUBLIC -fdelayed-template-parsing)
 endif()
+
+add_executable(
+  notifier
+  # NotifierC.cpp
+  # NotifierS.cpp
+  # ConsumerC.cpp
+  Notifier_i.cpp Notifier_Input_Handler.cpp notifier.cpp
+)
+target_link_libraries(notifier idl2cpp)
+
+add_executable(
+  consumer
+  # ConsumerC.cpp
+  # ConsumerS.cpp
+  # NotifierC.cpp
+  Consumer_Input_Handler.cpp
+  Consumer_Signal_Handler.cpp
+  Consumer_Handler.cpp
+  consumer.cpp
+  Consumer_i.cpp
+)
+target_link_libraries(consumer idl2cpp)
+
+add_executable(
+  supplier
+  # ConsumerC.cpp
+  # ConsumerS.cpp
+  # NotifierC.cpp
+  Supplier_i.cpp Supplier_Timer_Handler.cpp supplier.cpp Consumer_i.cpp
+)
+target_link_libraries(supplier idl2cpp)
 
 if(CMAKE_SKIP_INSTALL_RULES)
   return()
 endif()
 
-install(TARGETS ${PROJECT_NAME} RUNTIME COMPONENT ${PROJECT_NAME})
+install(TARGETS ${PROJECT_NAME} notifier consumer suppplier RUNTIME COMPONENT ${PROJECT_NAME})
 
 if(BUILD_SHARED_LIBS)
   install(IMPORTED_RUNTIME_ARTIFACTS ${PROJECT_NAME} RUNTIME_DEPENDENCY_SET _dependency_set)
@@ -52,5 +82,3 @@ if(BUILD_SHARED_LIBS)
   )
   # cmake-format: on
 endif()
-
-include(CPack)
