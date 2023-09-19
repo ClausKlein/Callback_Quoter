@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.21...3.27)
 
-option(CMAKE_EXPORT_COMPILE_COMMANDS "for clang-tidy" ON)
+option(CMAKE_EXPORT_COMPILE_COMMANDS "for clang-tidy" YES)
+option(CMAKE_UNITY_BUILD "" YES)
 option(BUILD_SHARED_LIBS "" YES)
 
 #================================
@@ -19,7 +20,6 @@ if(NOT TARGET Axcioma::itaox11)
 endif()
 
 include(GenerateTaoIdl)
-
 tao_wrap_idl(Consumer.idl Notifier.idl)
 
 add_library(idl2cpp ${TAO_IDL_GENERATED})
@@ -68,7 +68,7 @@ if(CMAKE_SKIP_INSTALL_RULES)
   return()
 endif()
 
-install(TARGETS ${PROJECT_NAME} notifier consumer suppplier RUNTIME COMPONENT ${PROJECT_NAME})
+install(TARGETS ${PROJECT_NAME} notifier consumer supplier RUNTIME COMPONENT ${PROJECT_NAME})
 
 if(BUILD_SHARED_LIBS)
   install(IMPORTED_RUNTIME_ARTIFACTS ${PROJECT_NAME} RUNTIME_DEPENDENCY_SET _dependency_set)
