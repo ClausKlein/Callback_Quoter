@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.21...3.27)
 
 option(CMAKE_EXPORT_COMPILE_COMMANDS "for clang-tidy" YES)
-option(CMAKE_UNITY_BUILD "" YES)
-option(BUILD_SHARED_LIBS "" YES)
 
 #================================
 project(idl2cpp VERSION 0.1.0 LANGUAGES CXX)
@@ -22,7 +20,7 @@ endif()
 include(GenerateTaoIdl)
 tao_wrap_idl(Consumer.idl Notifier.idl)
 
-add_library(idl2cpp ${TAO_IDL_GENERATED})
+add_library(idl2cpp STATIC ${TAO_IDL_GENERATED})
 target_link_libraries(idl2cpp PUBLIC Axcioma::itaox11)
 set_target_properties(idl2cpp PROPERTIES CXX_STANDARD 17)
 
@@ -35,34 +33,28 @@ endif()
 
 add_executable(
   notifier
-  # NotifierC.cpp
-  # NotifierS.cpp
-  # ConsumerC.cpp
+  # NotifierC.cpp NotifierS.cpp ConsumerC.cpp
   Notifier_i.cpp Notifier_Input_Handler.cpp notifier.cpp
 )
-target_link_libraries(notifier idl2cpp)
+target_link_libraries(notifier PUBLIC idl2cpp)
 
 add_executable(
   consumer
-  # ConsumerC.cpp
-  # ConsumerS.cpp
-  # NotifierC.cpp
+  # ConsumerC.cpp ConsumerS.cpp NotifierC.cpp
   Consumer_Input_Handler.cpp
   Consumer_Signal_Handler.cpp
   Consumer_Handler.cpp
   consumer.cpp
   Consumer_i.cpp
 )
-target_link_libraries(consumer idl2cpp)
+target_link_libraries(consumer PUBLIC idl2cpp)
 
 add_executable(
   supplier
-  # ConsumerC.cpp
-  # ConsumerS.cpp
-  # NotifierC.cpp
+  # ConsumerC.cpp ConsumerS.cpp NotifierC.cpp
   Supplier_i.cpp Supplier_Timer_Handler.cpp supplier.cpp Consumer_i.cpp
 )
-target_link_libraries(supplier idl2cpp)
+target_link_libraries(supplier PUBLIC idl2cpp)
 
 if(CMAKE_SKIP_INSTALL_RULES)
   return()
@@ -70,15 +62,15 @@ endif()
 
 install(TARGETS ${PROJECT_NAME} notifier consumer supplier RUNTIME COMPONENT ${PROJECT_NAME})
 
-if(BUILD_SHARED_LIBS)
-  install(IMPORTED_RUNTIME_ARTIFACTS ${PROJECT_NAME} RUNTIME_DEPENDENCY_SET _dependency_set)
+install(IMPORTED_RUNTIME_ARTIFACTS notifier RUNTIME_DEPENDENCY_SET _dependency_set)
 
-  # FIXME: CONFLICTING_DEPENDENCIES_PREFIX  _conflicts
-  # cmake-format: off
-  install(
-    RUNTIME_DEPENDENCY_SET _dependency_set
-    POST_EXCLUDE_REGEXES "${CMAKE_INSTALL_PREFIX}/lib"
-    RUNTIME DESTINATION lib
-  )
-  # cmake-format: on
-endif()
+# FIXME: CONFLICTING_DEPENDENCIES_PREFIX  _conflicts
+# cmake-format: off
+install(
+  RUNTIME_DEPENDENCY_SET _dependency_set
+  POST_EXCLUDE_REGEXES ${CMAKE_SOURCE_DIR}/lib/
+  POST_EXCLUDE_REGEXES ${CMAKE_SOURCE_DIR}/ACE/ACE/lib/
+  POST_EXCLUDE_REGEXES "${CMAKE_INSTALL_PREFIX}/lib"
+  RUNTIME DESTINATION lib
+)
+# cmake-format: on
