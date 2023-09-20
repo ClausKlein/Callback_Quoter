@@ -74,3 +74,12 @@ install(
   RUNTIME DESTINATION lib
 )
 # cmake-format: on
+
+enable_testing()
+
+#
+# NOTE: this test works only after install and with taox11 environment! CK
+#
+install(FILES example.stocks DESTINATION bin)
+install(PROGRAMS run_test.pl DESTINATION bin)
+add_test(NAME example COMMAND run_test.pl -s --debug WORKING_DIRECTORY ${CMAKE_STAGING_PREFIX}/bin)

@@ -72,7 +72,7 @@ if ($no_naming_service)
 else
 {
     $NS = $nstarget->CreateProcess (
-        "$ENV{TAO_ROOT}/orbsvcs/Naming_Service/tao_cosnaming",
+        "tao_cosnaming",
         "-o $nstarget_nsiorfile");
     $N = $ntarget->CreateProcess (
         "notifier",
@@ -152,7 +152,7 @@ if ($c1_status != 0) {
     $N->Kill (); $N->TimedWait (1);
     exit 1;
 }
-#XXX sleep $sleeptime;
+sleep $sleeptime;
 
 $c2_status = $C2->Spawn ();
 if ($c2_status != 0) {
@@ -162,7 +162,7 @@ if ($c2_status != 0) {
     $C1->Kill (); $C1->TimedWait (1);
     exit 1;
 }
-#XXX sleep $sleeptime;
+sleep $sleeptime;
 
 $s_status = $S->SpawnWaitKill ($starget->ProcessStopWaitInterval() + 60);
 if ($s_status != 0) {
