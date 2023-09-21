@@ -5,7 +5,7 @@
 #  pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include "orbsvcs/orbsvcs/naming_server/CosNamingC.h"
+#include "orbsvcs/naming_server/CosNamingC.h"
 
 #include "tao/x11/log.h"
 

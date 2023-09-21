@@ -15,6 +15,7 @@ endif()
 
 if(NOT TARGET Axcioma::itaox11)
   find_package(itaox11 CONFIG REQUIRED)
+  list(APPEND CMAKE_MODULE_PATH ${CMAKE_STAGING_PREFIX}/share/cmake/modules)
 endif()
 
 include(GenerateTaoIdl)
