@@ -9,8 +9,8 @@
 //=============================================================================
 
 #include "Consumer_Input_Handler.h"
+
 #include "ace/OS_NS_ctype.h"
-#include "ace/OS_NS_unistd.h"
 #include "ace/Read_Buffer.h"
 
 Consumer_Input_Handler::Consumer_Input_Handler (Consumer_Handler* consumer_handler)
@@ -18,9 +18,18 @@ Consumer_Input_Handler::Consumer_Input_Handler (Consumer_Handler* consumer_handl
   consumer_handler_ = consumer_handler;
 }
 
+// Method called before the Event_Handler dies.
+int Consumer_Input_Handler::handle_close (ACE_HANDLE, ACE_Reactor_Mask)
+{
+  // End of the input handler.
+  delete this;
+
+  return 0;
+}
+
 int Consumer_Input_Handler::handle_input (ACE_HANDLE)
 {
-  char buf[BUFSIZ];
+  char buf[BUFSIZ]{};
 
   // The string could read contains \n\0 hence using ACE_OS::read
   // which returns the no of bytes read and hence i can manipulate
@@ -28,7 +37,9 @@ int Consumer_Input_Handler::handle_input (ACE_HANDLE)
 
   ssize_t strlen = ACE_OS::read (ACE_STDIN, buf, sizeof buf);
   if (buf[strlen - 1] == '\n')
+  {
     buf[strlen - 1] = '\0';
+  }
 
   switch (ACE_OS::ace_tolower (buf[0]))
   {
@@ -53,40 +64,44 @@ int Consumer_Input_Handler::handle_input (ACE_HANDLE)
 
 int Consumer_Input_Handler::register_consumer ()
 {
-
   // Get the stockname the consumer is interested in.
-  static char stockname[BUFSIZ];
+  char stockname[BUFSIZ]{};
 
-  ACE_DEBUG ((LM_DEBUG, "Stockname?"));
+  taox11_debug << "Stockname?";
 
   ssize_t strlen = ACE_OS::read (ACE_STDIN, stockname, sizeof stockname - 1);
 
   // Taking care of platforms where an carriage return is padded with newline.
   if (stockname[strlen - 2] == '\n' || stockname[strlen - 2] == '\r')
+  {
     stockname[strlen - 2] = '\0';
+  }
   else if (stockname[strlen - 1] == '\n' || stockname[strlen - 1] == '\r')
+  {
     stockname[strlen - 1] = '\0';
+  }
 
   this->consumer_handler_->stock_name_ = stockname;
 
   // Get the threshold value.
   char needed_stock_value[BUFSIZ];
-  ACE_DEBUG ((LM_DEBUG, "Threshold Stock value?"));
+  taox11_debug << "Threshold Stock value?";
 
   strlen = ACE_OS::read (ACE_STDIN, needed_stock_value, sizeof needed_stock_value);
 
   if (needed_stock_value[strlen - 1] == '\n')
+  {
     needed_stock_value[strlen - 1] = '\0';
+  }
 
   this->consumer_handler_->threshold_value_ = ACE_OS::atoi (needed_stock_value);
 
   try
   {
-
     // Register with the server.
-    this->consumer_handler_->server_->register_callback (this->consumer_handler_->stock_name_.c_str (),
+    this->consumer_handler_->server_->register_callback (this->consumer_handler_->stock_name_,
                                                          this->consumer_handler_->threshold_value_,
-                                                         this->consumer_handler_->consumer_var_.in ());
+                                                         this->consumer_handler_->consumer_var_);
 
     // Note the registration.
     consumer_handler_->registered_ = 1;
@@ -94,11 +109,11 @@ int Consumer_Input_Handler::register_consumer ()
 
     // @@ Up to this point..
 
-    ACE_DEBUG ((LM_DEBUG, "registeration done!\n"));
+    taox11_debug << "registeration done!\n";
   }
   catch (const CORBA::Exception& ex)
   {
-    ex._tao_print_exception ("Consumer_Input_Handler::register_consumer()\n");
+    taox11_error << "Exception in Consumer_Input_Handler::register_consumer(): " << ex << std::endl;
     return -1;
   }
 
@@ -107,65 +122,57 @@ int Consumer_Input_Handler::register_consumer ()
 
 int Consumer_Input_Handler::unregister_consumer ()
 {
-  // Only if the consumer is registered can the
-  // unregistration take place.
+  // Only if the consumer is registered can the unregistration take place.
 
   if (consumer_handler_->registered_ == 1)
   {
-    this->consumer_handler_->server_->unregister_callback (this->consumer_handler_->consumer_var_.in ());
+    this->consumer_handler_->server_->unregister_callback (this->consumer_handler_->consumer_var_);
 
-    ACE_DEBUG ((LM_DEBUG, " Consumer Unregistered \n"));
+    taox11_debug << " Consumer Unregistered \n";
     consumer_handler_->unregistered_ = 1;
     consumer_handler_->registered_ = 0;
+    return 0;
   }
-  else
-    ACE_DEBUG ((LM_DEBUG, " Invalid Operation: Consumer not Registered\n"));
 
-  return 0;
+  taox11_debug << " Invalid Operation: Consumer not Registered\n";
+  return -1;
 }
 
 int Consumer_Input_Handler::quit_consumer_process ()
 {
-  // Only if the consumer is registered and wants to shut
-  // down, its necessary to unregister and then shutdown.
+  // Only if the consumer is registered and wants to shut down, its necessary to unregister and then shutdown.
 
   try
   {
     if (consumer_handler_->unregistered_ != 1 && consumer_handler_->registered_ == 1)
     {
-      // If the notifier has exited and the consumer tries to call
-      // the unregister_callback method tehn an exception will be
+      // If the notifier has exited and the consumer tries to call the unregister_callback method tehn an exception will be
       // raised. Hence check for this case using.
-      this->consumer_handler_->server_->unregister_callback (this->consumer_handler_->consumer_var_.in ());
+      this->consumer_handler_->server_->unregister_callback (this->consumer_handler_->consumer_var_);
 
-      ACE_DEBUG ((LM_DEBUG, " Consumer Unregistered \n"));
+      taox11_debug << " Consumer Unregistered \n";
       consumer_handler_->unregistered_ = 0;
       consumer_handler_->registered_ = 0;
     }
-    this->consumer_handler_->consumer_servant_->shutdown ();
+    this->consumer_handler_->consumer_var_->shutdown ();
   }
   catch (const CORBA::Exception& ex)
   {
-    // There would be an exception only if there is a communication
-    // failure between the notifier and consumer. On catching the
-    // exception proclaim the problem and do a graceful exit.
-    ex._tao_print_exception ("Communication failed!\n");
+    // There would be an exception only if there is a communication failure between the notifier and consumer. On catching
+    // the exception proclaim the problem and do a graceful exit.
+    taox11_error << "Exception in Consumer_Input_Handler::quit_consumer_process(): " << ex << std::endl;
 
     try
     {
-      this->consumer_handler_->consumer_servant_->shutdown ();
+      this->consumer_handler_->consumer_var_->shutdown ();
     }
     catch (const CORBA::Exception&)
     {
+      // ignored
     }
 
     return -1;
   }
 
   return 0;
-}
-
-Consumer_Input_Handler::~Consumer_Input_Handler (void)
-{
-  // No-op
 }

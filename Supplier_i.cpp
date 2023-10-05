@@ -9,66 +9,58 @@
 //=============================================================================
 
 #include "Supplier_i.h"
+
+#include "Naming_Client.h"
+
 #include "ace/Get_Opt.h"
-#include "ace/OS_NS_fcntl.h"
-#include "ace/OS_NS_stdio.h"
-#include "ace/OS_NS_string.h"
-#include "ace/OS_NS_unistd.h"
-#include "ace/Reactor.h"
 #include "ace/Read_Buffer.h"
-#include "tao/debug.h"
+
+#include <fstream>
 
 // Constructor.
-
-Supplier::Supplier (void)
-  : ior_ (0)
+Supplier::Supplier ()
+  : supplier_timer_handler_ (nullptr)
+  , argc_ (0)
+  , argv_ (nullptr)
+  , ior_ ()
   , use_naming_service_ (1)
   , notifier_ ()
-  , f_ptr_ (0)
-  , loop_count_ (10)
+  , f_ptr_ (nullptr)
+  // UNUSED! , loop_count_ (10)
   , period_value_ (1)
 {
   // No-op.
 }
 
-Supplier::~Supplier (void)
+Supplier::~Supplier ()
 {
-  // Release the memory allocated for ior_.
-  ACE_OS::free (this->ior_);
-
   // Close the stream.
-  ACE_OS::fclose (f_ptr_);
+  ACE_OS::fclose (this->f_ptr_);
 
-  ACE_DEBUG ((LM_DEBUG, "Market Status Supplier daemon exiting!\n"));
+  // TODO: TBD delete this->supplier_timer_handler_;
+
+  taox11_debug << "Market Status Supplier Daemon exiting!" << std::endl;
 }
 
 // Reads the Server factory IOR from a file.
-
-int Supplier::read_ior (ACE_TCHAR* filename)
+int Supplier::read_ior (const std::string& filename)
 {
   // Open the file for reading.
-  ACE_HANDLE f_handle = ACE_OS::open (filename, 0);
+  std::ifstream fis (filename);
+  if (!fis)
+  {
+    taox11_error << "ERROR: failed to open file: " << filename << std ::endl;
+    return -1;
+  }
 
-  if (f_handle == ACE_INVALID_HANDLE)
-    ACE_ERROR_RETURN ((LM_ERROR, "Unable to open %s for reading\n", filename), -1);
-
-  ACE_Read_Buffer ior_buffer (f_handle);
-  char* data = ior_buffer.read ();
-
-  if (data == 0)
-    ACE_ERROR_RETURN ((LM_ERROR, "Unable to read ior\n"), -1);
-
-  this->ior_ = ACE_OS::strdup (ACE_TEXT_CHAR_TO_TCHAR (data));
-  ior_buffer.alloc ()->free (data);
-
-  ACE_OS::close (f_handle);
+  std::getline (fis, this->ior_);
+  fis.close ();
 
   return 0;
 }
 
 // Parses the command line arguments and returns an error status.
-
-int Supplier::parse_args (void)
+int Supplier::parse_args ()
 {
   ACE_Get_Opt get_opts (argc_, argv_, ACE_TEXT ("dn:f:i:xk:xs"));
 
@@ -76,10 +68,11 @@ int Supplier::parse_args (void)
   int result;
 
   while ((c = get_opts ()) != -1)
+  {
     switch (c)
     {
-      case 'd':            // Debug flag
-        TAO_debug_level++; //****
+      case 'd': // Debug flag
+        // TODO TAO_debug_level++; //****
         break;
 
       case 'n': // Period_value: time between two successive stockfeeds.
@@ -89,17 +82,21 @@ int Supplier::parse_args (void)
       case 'i': // Stock market information is got from a file.
         result = this->read_file (get_opts.opt_arg ());
         if (result < 0)
+        {
           ACE_ERROR_RETURN ((LM_ERROR, "Unable to read stock information from %s : %p\n", get_opts.opt_arg ()), -1);
+        }
         break;
 
-      case 'k': // Ior provide on command line
-        this->ior_ = ACE_OS::strdup (get_opts.opt_arg ());
+      case 'k': // IOR provide on command line
+        this->ior_ = get_opts.opt_arg ();
         break;
 
       case 'f': // Read the IOR from the file.
         result = this->read_ior (get_opts.opt_arg ());
         if (result < 0)
+        {
           ACE_ERROR_RETURN ((LM_ERROR, "Unable to read ior from %s : %p\n", get_opts.opt_arg ()), -1);
+        }
         break;
 
       case 's': // Don't use the naming service
@@ -121,94 +118,117 @@ int Supplier::parse_args (void)
                            this->argv_[0]),
                           -1);
     }
+  }
 
   // Indicates successful parsing of command line.
   return 0;
 }
 
 // Give the stock status information to the Notifier.
-
-int Supplier::send_market_status (const char* stock_name, long value)
+int Supplier::send_market_status (const char* stock_name, int32_t value)
 {
-
   try
   {
-
     // Make the RMI.
     this->notifier_->market_status (stock_name, value);
   }
   catch (const CORBA::SystemException& sysex)
   {
-    sysex._tao_print_exception ("System Exception : Supplier::send_market_status");
+    taox11_error << "System Exception : Supplier::send_market_status(): " << sysex << std::endl;
     return -1;
   }
   catch (const CORBA::UserException& userex)
   {
-    userex._tao_print_exception ("User Exception : Supplier::send_market_status");
+    taox11_error << "User Exception : Supplier::send_market_status(): " << userex << std::endl;
     return -1;
   }
   return 0;
 }
 
 // Execute client example code.
-
-int Supplier::run (void)
+int Supplier::run () const
 {
-
   long timer_id = 0;
 
-  ACE_DEBUG ((LM_DEBUG, "Market Status Supplier Daemon is running...\n"));
+  taox11_debug << "Market Status Supplier Daemon is running..." << std::endl;
 
   // This sets the period for the stock-feed.
-  ACE_Time_Value period (period_value_);
+  ACE_Time_Value period (this->period_value_);
 
   // "Your time starts now!" ;) the timer is scheduled to begin work.
-  timer_id = reactor_used ()->schedule_timer (supplier_timer_handler_, "Periodic stockfeed", period, period);
+  timer_id = reactor_used ()->schedule_timer (this->supplier_timer_handler_, "Periodic stockfeed", period, period);
   if (timer_id == -1)
+  {
     ACE_ERROR_RETURN ((LM_ERROR, "%p\n", "schedule_timer"), -1);
+  }
 
   // The reactor starts executing in a loop.
-  return this->reactor_used ()->run_reactor_event_loop ();
+  return reactor_used ()->run_reactor_event_loop ();
 }
 
-int Supplier::via_naming_service (void)
+int Supplier::via_naming_service ()
 {
+
+#if 1
+  // Get reference to initial naming context.
+  IDL::traits<CosNaming::NamingContext>::ref_type inc = resolve_init<CosNaming::NamingContext> (this->orb_, "NameService");
 
   try
   {
-    // Initialization of the naming service.
-    if (naming_services_client_.init (orb_.in ()) != 0)
+    // Look for Notifier in the Naming Service.
+    CosNaming::Name n (1);
+    n[0].id ("Notifier");
+
+    IDL::traits<CORBA::Object>::ref_type notifier_obj = resolve_name<Notifier> (inc, n);
+    if (notifier_obj == nullptr)
+    {
+      taox11_error << "ERROR : resolved Notifier seems nill" << std::endl;
+      return -1;
+    }
+
+    // The CORBA::Object object is downcast to Notifier using the <narrow> method.
+    this->notifier_ = IDL::traits<Notifier>::narrow (notifier_obj);
+  }
+  catch (const CosNaming::NamingContext::NotFound& ex)
+  {
+    taox11_error << "No Notifier in Naming Service" << ex << std::endl;
+    return -1;
+  }
+#else
+  try
+  {
+    // XXX Initialization of the naming service.
+    if (this->naming_services_client_.init (orb_) != 0)
       ACE_ERROR_RETURN ((LM_ERROR,
                          " (%P|%t) Unable to initialize "
                          "the TAO_Naming_Client.\n"),
                         -1);
     CosNaming::Name notifier_ref_name (1);
     notifier_ref_name.length (1);
-    notifier_ref_name[0].id = CORBA::string_dup ("Notifier");
+    notifier_ref_name[0].id = "Notifier";
 
-    CORBA::Object_var notifier_obj = this->naming_services_client_->resolve (notifier_ref_name);
+    IDL::traits<CORBA::Object>::ref_type notifier_obj = this->naming_services_client_->resolve (notifier_ref_name);
 
-    // The CORBA::Object_var object is downcast to Notifier_var
-    // using the <_narrow> method.
-    this->notifier_ = Notifier::_narrow (notifier_obj.in ());
+    // The CORBA::Object object is downcast to Notifier using the <_narrow> method.
+    this->notifier_ = IDL::traits<Notifier>::narrow (notifier_obj);
   }
   catch (const CORBA::SystemException& sysex)
   {
-    sysex._tao_print_exception ("System Exception : Supplier::via_naming_service\n");
+    taox11_error << "Exception : Supplier::via_naming_service()" << sysex << std::endl;
     return -1;
   }
   catch (const CORBA::UserException& userex)
   {
-    userex._tao_print_exception ("User Exception : Supplier::via_naming_service\n");
+    taox11_error << "Exception : Supplier::via_naming_service()" << userex << std::endl;
     return -1;
   }
+#endif
 
   return 0;
 }
 
 // Init function.
-
-int Supplier::init (int argc, ACE_TCHAR** argv)
+int Supplier::init (int argc, char** argv)
 {
   this->argc_ = argc;
   this->argv_ = argv;
@@ -220,53 +240,63 @@ int Supplier::init (int argc, ACE_TCHAR** argv)
 
     // Parse command line and verify parameters.
     if (this->parse_args () == -1)
+    {
       return -1;
+    }
 
     // Create the Timer_Handler.
-    ACE_NEW_RETURN (supplier_timer_handler_, Supplier_Timer_Handler (this, this->reactor_used (), this->f_ptr_), -1);
+    ACE_NEW_RETURN (this->supplier_timer_handler_, Supplier_Timer_Handler (this, reactor_used (), this->f_ptr_), -1);
 
     if (this->use_naming_service_)
+    {
       return via_naming_service ();
+    }
 
-    if (this->ior_ == 0)
+    if (this->ior_.empty ())
+    {
       ACE_ERROR_RETURN ((LM_ERROR, "%s: no ior specified\n", this->argv_[0]), -1);
-    CORBA::Object_var notifier_object = this->orb_->string_to_object (this->ior_);
+    }
+    IDL::traits<CORBA::Object>::ref_type notifier_object = this->orb_->string_to_object (this->ior_);
 
-    if (CORBA::is_nil (notifier_object.in ()))
-      ACE_ERROR_RETURN ((LM_ERROR, "invalid ior <%s>\n", this->ior_), -1);
-    // The downcasting from CORBA::Object_var to Notifier_var is
-    // done using the <_narrow> method.
-    this->notifier_ = Notifier::_narrow (notifier_object.in ());
+    if (notifier_object == nullptr)
+    {
+      ACE_ERROR_RETURN ((LM_ERROR, "invalid ior <%s>\n", this->ior_.c_str ()), -1);
+    }
+
+    // The downcasting from CORBA::Object to Notifier is done using the <narrow> method.
+    this->notifier_ = IDL::traits<Notifier>::narrow (notifier_object);
   }
   catch (const CORBA::SystemException& sysex)
   {
-    sysex._tao_print_exception ("System Exception : Supplier::init");
+    taox11_error << "System Exception : Supplier::init(): " << sysex << std::endl;
     return -1;
   }
   catch (const CORBA::UserException& userex)
   {
-    userex._tao_print_exception ("User Exception : Supplier::init");
+    taox11_error << "User Exception : Supplier::init(): " << userex << std::endl;
     return -1;
   }
 
   return 0;
 }
 
-ACE_Reactor* Supplier::reactor_used () const
+ACE_Reactor* Supplier::reactor_used ()
 {
   return ACE_Reactor::instance ();
 }
 
 // The stock market information is read from a file.
-
-int Supplier::read_file (ACE_TCHAR* filename)
+int Supplier::read_file (char* filename)
 {
-  f_ptr_ = ACE_OS::fopen (filename, "r");
+  this->f_ptr_ = ACE_OS::fopen (filename, "r");
 
-  ACE_DEBUG ((LM_DEBUG, "filename = %s\n", filename));
+  taox11_debug << "filename = " << filename << std::endl;
 
   // the stock values are to be read from a file.
-  if (f_ptr_ == 0)
+  if (this->f_ptr_ == nullptr)
+  {
     ACE_ERROR_RETURN ((LM_ERROR, "Unable to open %s for writing: %p\n", filename), -1);
+  }
+
   return 0;
 }

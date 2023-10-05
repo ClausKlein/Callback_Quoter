@@ -12,33 +12,27 @@
 
 #include "Consumer_i.h"
 
-Consumer_i::Consumer_i (void)
-{}
+#include "tao/x11/log.h"
 
-Consumer_i::~Consumer_i (void)
-{}
+Consumer_i::Consumer_i (IDL::traits<CORBA::ORB>::ref_type orb)
+// UNUSED : quit_ (0)
+{
+  this->orb_ = std::move (orb);
+}
 
 void Consumer_i::push (const Callback_Quoter::Info& data)
 {
-  // On getting the needed information you now proceed to the next
-  // step, which could be obtaining the shares.
+  // On getting the needed information you now proceed to the next step, which could be obtaining the shares.
 
-  ACE_DEBUG ((LM_DEBUG, "Selling 10,000 %s shares at %d!!\n", data.stock_name.in (), data.value));
+  taox11_debug << "Selling 10,000 " << data.stock_name () << " shares at " << data.value () << std::endl;
 }
 
-void Consumer_i::shutdown (void)
+void Consumer_i::shutdown ()
 {
-
   // Instruct the ORB to shutdown.
 
-  ACE_DEBUG ((LM_DEBUG, " consumer shutting down \n"));
+  taox11_debug << "consumer shutting down" << std::endl;
 
   this->orb_->shutdown ();
-}
-
-void Consumer_i::orb (CORBA::ORB_ptr o)
-{
-  // Makes a copy of the ORB pointer.
-
-  this->orb_ = CORBA::ORB::_duplicate (o);
+  // UNUSED this->quit_ = 1;
 }

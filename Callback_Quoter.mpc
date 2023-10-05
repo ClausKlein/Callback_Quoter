@@ -1,5 +1,5 @@
 // -*- MPC -*-
-project(*IDL): taoidldefaults {
+project(*IDL): ridl_ostream_defaults, taox11_anytypecode {
   IDL_Files {
     Consumer.idl
     Notifier.idl
@@ -7,7 +7,7 @@ project(*IDL): taoidldefaults {
   custom_only = 1
 }
 
-project(Callback_Quoter notifier): namingexe, utils, avoids_corba_e_micro {
+project(Callback_Quoter notifier): taox11_server, taox11_cosnaming_stub, taox11_anytypecode, avoids_corba_e_micro {
   exename = notifier
   after += *IDL
   Source_Files {
@@ -22,7 +22,7 @@ project(Callback_Quoter notifier): namingexe, utils, avoids_corba_e_micro {
   }
 }
 
-project(Callback_Quoter consumer): namingexe, portableserver {
+project(Callback_Quoter consumer): taox11_server, taox11_cosnaming_stub, taox11_anytypecode, avoids_corba_e_compact {
   exename = consumer
   after += *IDL
   Source_Files {
@@ -39,7 +39,7 @@ project(Callback_Quoter consumer): namingexe, portableserver {
   }
 }
 
-project(Callback_Quoter supplier): namingexe, portableserver {
+project(Callback_Quoter supplier): taox11_server, taox11_cosnaming_stub, taox11_anytypecode, avoids_corba_e_compact {
   exename = supplier
   after += *IDL
   Source_Files {
