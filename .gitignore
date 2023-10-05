@@ -17,3 +17,5 @@
 GNUmakefile*
 ctags
 tags
+build/
+install/

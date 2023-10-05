@@ -13,6 +13,11 @@ if(NOT DEFINED CMAKE_CXX_STANDARD)
   option(CMAKE_CXX_STANDARD_REQUIRED "" YES)
 endif()
 
+if(UNIX AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  set(CMAKE_DEPFILE_FLAGS_C "-MMD -MT <DEP_TARGET> -MF <DEP_FILE>")
+  set(CMAKE_DEPFILE_FLAGS_CXX "-MMD -MT <DEP_TARGET> -MF <DEP_FILE>")
+endif()
+
 if(NOT TARGET Axcioma::itaox11)
   find_package(itaox11 CONFIG REQUIRED)
   list(APPEND CMAKE_MODULE_PATH ${CMAKE_STAGING_PREFIX}/share/cmake/modules)
@@ -21,7 +26,7 @@ endif()
 include(GenerateTaoIdl)
 tao_wrap_idl(Consumer.idl Notifier.idl)
 
-add_library(idl2cpp STATIC ${TAO_IDL_GENERATED})
+add_library(idl2cpp ${TAO_IDL_GENERATED})
 target_link_libraries(idl2cpp PUBLIC Axcioma::itaox11)
 set_target_properties(idl2cpp PROPERTIES CXX_STANDARD 17)
 
@@ -83,4 +88,7 @@ enable_testing()
 #
 install(FILES example.stocks DESTINATION bin)
 install(PROGRAMS run_test.pl DESTINATION bin)
-add_test(NAME example COMMAND run_test.pl -s --debug WORKING_DIRECTORY ${CMAKE_STAGING_PREFIX}/bin)
+add_test(NAME example COMMAND perl -I${CMAKE_STAGING_PREFIX}/share/perl5 run_test.pl -s WORKING_DIRECTORY ${CMAKE_STAGING_PREFIX}/bin)
+
+set(CPACK_GENERATOR "TGZ")
+include(CPack)
