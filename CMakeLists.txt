@@ -1,9 +1,9 @@
-cmake_minimum_required(VERSION 3.21...3.27)
+cmake_minimum_required(VERSION 3.25...4.1)
 
 option(CMAKE_EXPORT_COMPILE_COMMANDS "for clang-tidy" YES)
 
 #================================
-project(idl2cpp VERSION 0.1.0 LANGUAGES CXX)
+project(idl2cpp VERSION 0.1.1 LANGUAGES CXX)
 #================================
 
 ## require a C++ standard
@@ -34,7 +34,7 @@ if(APPLE) # "think different", indeed
   target_compile_definitions(
     idl2cpp PUBLIC __ACE_INLINE__ ACE_HAS_IPV6 ACE_HAS_VERSIONED_NAMESPACE=1 ACE_HAS_CUSTOM_EXPORT_MACROS=0
   )
-  target_compile_options(idl2cpp PUBLIC -fdelayed-template-parsing)
+  # XXX target_compile_options(idl2cpp PUBLIC -fdelayed-template-parsing)
 endif()
 
 add_executable(
