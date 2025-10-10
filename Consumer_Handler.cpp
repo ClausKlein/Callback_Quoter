@@ -30,7 +30,9 @@ using namespace TAOX11_NAMESPACE;
 #include "ace/Event_Handler.h"
 #include "ace/Get_Opt.h"
 
+#include <cstdlib>
 #include <fstream>
+#include <string>
 
 Consumer_Handler::Consumer_Handler ()
   : stock_name_ ("Unknown")
@@ -128,7 +130,7 @@ int Consumer_Handler::parse_args ()
         break;
 
       case 't':
-        this->threshold_value_ = ACE_OS::atoi (get_opts.opt_arg ());
+        this->threshold_value_ = std::atoi (get_opts.opt_arg ());
         break;
 
         // UNUSED case 'x': this->shutdown_ = 1; break;

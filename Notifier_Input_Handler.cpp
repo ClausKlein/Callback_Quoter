@@ -16,6 +16,7 @@
 #include "ace/Get_Opt.h"
 #include "ace/OS_NS_ctype.h"
 
+#include <cstdio>
 #include <fstream>
 
 // Constructor.
@@ -295,10 +296,10 @@ int Notifier_Input_Handler::handle_input (ACE_HANDLE)
 
   try
   {
-    // The string could read contains \n\0 hence using ACE_OS::read which returns the no of bytes read and hence i can
+    // The string could read contains \n\0 hence using std::read which returns the no of bytes read and hence i can
     // manipulate and remove the devil from the picture i.e '\n' ! ;)
 
-    ssize_t strlen = ACE_OS::read (ACE_STDIN, buf, sizeof buf);
+    ssize_t strlen = std::read (ACE_STDIN, buf, sizeof buf);
     if (buf[strlen - 1] == '\n')
     {
       buf[strlen - 1] = '\0';

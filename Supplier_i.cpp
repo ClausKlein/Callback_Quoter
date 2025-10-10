@@ -15,6 +15,8 @@
 #include "ace/Get_Opt.h"
 #include "ace/Read_Buffer.h"
 
+#include <cstdio>
+#include <cstdlib>
 #include <fstream>
 
 // Constructor.
@@ -35,7 +37,7 @@ Supplier::Supplier ()
 Supplier::~Supplier ()
 {
   // Close the stream.
-  ACE_OS::fclose (this->f_ptr_);
+  std::fclose (this->f_ptr_);
 
   // TODO: TBD delete this->supplier_timer_handler_;
 
@@ -76,7 +78,7 @@ int Supplier::parse_args ()
         break;
 
       case 'n': // Period_value: time between two successive stockfeeds.
-        this->period_value_ = ACE_OS::atoi (get_opts.opt_arg ());
+        this->period_value_ = std::atoi (get_opts.opt_arg ());
         break;
 
       case 'i': // Stock market information is got from a file.
@@ -288,7 +290,7 @@ ACE_Reactor* Supplier::reactor_used ()
 // The stock market information is read from a file.
 int Supplier::read_file (char* filename)
 {
-  this->f_ptr_ = ACE_OS::fopen (filename, "r");
+  this->f_ptr_ = std::fopen (filename, "r");
 
   taox11_debug << "filename = " << filename << std::endl;
 
