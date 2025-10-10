@@ -34,11 +34,11 @@ int Consumer_Input_Handler::handle_input (ACE_HANDLE)
 {
   char buf[BUFSIZ]{};
 
-  // The string could read contains \n\0 hence using std::read
+  // The string could read contains \n\0 hence using ACE_OS::read
   // which returns the no of bytes read and hence i can manipulate
   // and remove the devil from the picture i.e '\n' ! ;)
 
-  ssize_t strlen = std::read (ACE_STDIN, buf, sizeof buf);
+  ssize_t strlen = ACE_OS::read (ACE_STDIN, buf, sizeof buf);
   if (buf[strlen - 1] == '\n')
   {
     buf[strlen - 1] = '\0';
@@ -72,7 +72,7 @@ int Consumer_Input_Handler::register_consumer ()
 
   taox11_debug << "Stockname?";
 
-  ssize_t strlen = std::read (ACE_STDIN, stockname, sizeof stockname - 1);
+  ssize_t strlen = ACE_OS::read (ACE_STDIN, stockname, sizeof stockname - 1);
 
   // Taking care of platforms where an carriage return is padded with newline.
   if (stockname[strlen - 2] == '\n' || stockname[strlen - 2] == '\r')
@@ -90,14 +90,14 @@ int Consumer_Input_Handler::register_consumer ()
   char needed_stock_value[BUFSIZ];
   taox11_debug << "Threshold Stock value?";
 
-  strlen = std::read (ACE_STDIN, needed_stock_value, sizeof needed_stock_value);
+  strlen = ACE_OS::read (ACE_STDIN, needed_stock_value, sizeof needed_stock_value);
 
   if (needed_stock_value[strlen - 1] == '\n')
   {
     needed_stock_value[strlen - 1] = '\0';
   }
 
-  this->consumer_handler_->threshold_value_ = std::atoi (needed_stock_value);
+  this->consumer_handler_->threshold_value_ = ACE_OS::atoi (needed_stock_value);
 
   try
   {
