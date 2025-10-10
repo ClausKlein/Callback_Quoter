@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.25...4.1)
 option(CMAKE_EXPORT_COMPILE_COMMANDS "for clang-tidy" YES)
 
 #===========================================
-project(idl2cpp VERSION 0.1.2 LANGUAGES CXX)
+project(idl2cpp VERSION 0.1.3 LANGUAGES CXX)
 #===========================================
 
 ## require a C++ standard
@@ -20,7 +20,7 @@ endif()
 
 if(NOT TARGET Axcioma::itaox11)
     find_package(itaox11 CONFIG REQUIRED)
-    list(APPEND CMAKE_MODULE_PATH ${CMAKE_STAGING_PREFIX}/share/cmake/modules)
+    list(APPEND CMAKE_MODULE_PATH ${CMAKE_INSTALL_PREFIX}/share/cmake/modules)
 endif()
 
 include(GenerateTaoIdl)
@@ -69,7 +69,7 @@ install(
     RUNTIME COMPONENT ${PROJECT_NAME}
 )
 
-if(APPLE) # "think different", indeed
+if(APPLE) # NOTE: "think different", indeed! CK
     install(
         IMPORTED_RUNTIME_ARTIFACTS notifier
         RUNTIME_DEPENDENCY_SET _dependency_set
@@ -79,7 +79,7 @@ if(APPLE) # "think different", indeed
         RUNTIME_DEPENDENCY_SET _dependency_set
         POST_EXCLUDE_REGEXES ${CMAKE_SOURCE_DIR}/lib
         POST_EXCLUDE_REGEXES ${CMAKE_SOURCE_DIR}/ACE/ACE/lib
-        POST_EXCLUDE_REGEXES ${CMAKE_STAGING_PREFIX}/lib
+        POST_EXCLUDE_REGEXES ${CMAKE_INSTALL_PREFIX}/lib
         RUNTIME DESTINATION lib
     )
 endif()
@@ -93,8 +93,8 @@ install(FILES example.stocks DESTINATION bin)
 install(PROGRAMS run_test.pl DESTINATION bin)
 add_test(
     NAME example
-    COMMAND perl -I${CMAKE_STAGING_PREFIX}/share/perl5 run_test.pl -s
-    WORKING_DIRECTORY ${CMAKE_STAGING_PREFIX}/bin
+    COMMAND perl -I${CMAKE_INSTALL_PREFIX}/share/perl5 run_test.pl -s
+    WORKING_DIRECTORY ${CMAKE_INSTALL_PREFIX}/bin
 )
 
 set(CPACK_GENERATOR "TGZ")
