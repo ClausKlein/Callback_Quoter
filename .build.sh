@@ -22,5 +22,7 @@ cmake -S . -B ${BUILD_DIR} -G Ninja -D CMAKE_CXX_COMPILER_LAUNCHER=${CCACHE} \
 
 # build example
 cmake --build ${BUILD_DIR} --target all
-cmake --build ${BUILD_DIR} --target test
-
+# install example
+cmake --install ${BUILD_DIR} --prefix ${STAGE_DIR}
+# test installed example
+ctest --test-dir ${BUILD_DIR} --output-on-failure
