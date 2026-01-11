@@ -12,14 +12,16 @@
 
 #ifndef SUPPLIER_TIMER_HANDLER_H
 #define SUPPLIER_TIMER_HANDLER_H
-#include "Supplier_i.h"
-#include "ace/Event_Handler.h"
-#include "ace/Reactor.h"
-#include "ace/Timer_Queue.h"
 
 #if !defined(ACE_LACKS_PRAGMA_ONCE)
 #  pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
+
+#include "Supplier_i.h"
+
+#include "ace/Event_Handler.h"
+#include "ace/Reactor.h"
+#include "ace/Timer_Queue.h"
 
 class Supplier;
 
@@ -39,14 +41,14 @@ public:
   Supplier_Timer_Handler (Supplier* supplier, ACE_Reactor* reactor, FILE* file_ptr);
 
   /// Destructor.
-  ~Supplier_Timer_Handler (void);
+  ~Supplier_Timer_Handler () = default;
 
   /// Method which will be called by the Reactor when timeout occurs.
-  virtual int handle_timeout (const ACE_Time_Value& tv, const void* arg = 0);
+  int handle_timeout (const ACE_Time_Value& tv, const void* arg = 0) override;
 
 private:
   /// The values of the stock and its rate are got from the file.
-  int get_stock_information (void);
+  int get_stock_information ();
 
   /// The supplier instance.
   Supplier* supplier_obj_;
@@ -58,10 +60,10 @@ private:
   FILE* file_ptr_;
 
   /// The name of the stock.
-  char stockname_[BUFSIZ];
+  char stockname_[BUFSIZ]{};
 
   /// The market value of the stock.It will be typecasted to long later.
-  long value_;
+  int32_t value_{ -1 };
 };
 
 #endif /* SUPPLIER_TIMER_HANDLER_H */

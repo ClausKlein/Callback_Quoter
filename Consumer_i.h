@@ -12,46 +12,45 @@
 
 #ifndef CONSUMER_I_H
 #define CONSUMER_I_H
-#include "ConsumerC.h"
+
+#if !defined(ACE_LACKS_PRAGMA_ONCE)
+#  pragma once
+#endif /* ACE_LACKS_PRAGMA_ONCE */
+
 #include "ConsumerS.h"
-#include "NotifierS.h"
+#include "NotifierC.h"
 
 /**
  * @class Consumer_i
  *
  * @brief Consumer object implementation.
  *
- * This class has methods that are called by the callback quoter
- * server.
+ * This class has methods that are called by the callback quoter server.
  */
-class Consumer_i : public POA_Callback_Quoter::Consumer
+class Consumer_i final : public virtual CORBA::servant_traits<Callback_Quoter::Consumer>::base_type
 {
 public:
   /// Constructor.
-  Consumer_i (void);
+  Consumer_i (IDL::traits<CORBA::ORB>::ref_type orb);
 
   /// Destructor.
-  ~Consumer_i (void);
+  ~Consumer_i () = default;
 
   /// Gets the stock information from the Notifier.
-  void push (const Callback_Quoter::Info& data);
+  void push (const Callback_Quoter::Info& data) override;
 
   /// Used to get the consumer to shut down.
-  virtual void shutdown (void);
-
-  /// Set the ORB pointer.
-  void orb (CORBA::ORB_ptr o);
+  void shutdown () override;
 
 private:
-  /// ORB pointer.
-  CORBA::ORB_var orb_;
+  /// ORB used.
+  IDL::traits<CORBA::ORB>::ref_type orb_;
 
   /// If 1 denotes that the consumer is dead else alive.
-  int quit_;
+  // UNUSED int quit_;
 
-  // @@ Please rename to Notifier.
   /// Smart pointer to the Notifier object.
-  Notifier_var server_;
+  // UNUSED IDL::traits<Notifier>::ref_type notifier_;
 };
 
 #endif /* CONSUMER_I_H  */
